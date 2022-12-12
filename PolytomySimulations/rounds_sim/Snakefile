@@ -1,0 +1,69 @@
+configfile: "rounds_config.json"
+REC = config.get("REC")
+SIMTYPE = config.get("SIMTYPE")
+RES = config.get("RES")
+STRICT = config.get("STRICT")
+ROUNDS = config.get("ROUNDS")
+
+
+rule all:
+    input:
+        "results.zip"
+
+rule precompile_script:
+    message:
+        "precompile julia script"
+    output:
+        "polytomy_simulations.so",
+    shell:
+        """
+        julia --project=../../. build_sys_image.jl
+        rm -r results
+        """
+
+rule run_simulations:
+    message:
+        "start simulations in julia"
+    input:
+        "polytomy_simulations.so"
+    output:
+        "results/results_{simtype}_{res}_{strict}_{rounds}/results_correct_{rec}.txt",
+        "results/results_{simtype}_{res}_{strict}_{rounds}/results_incorrect_{rec}.txt",
+        "results/results_{simtype}_{res}_{strict}_{rounds}/results_rf_{rec}.txt",
+    params: 
+        n_leaves = config.get("n"),
+        rounds  = config.get("sim"),
+    wildcard_constraints:
+        rec = "(-4.0|-3.75|-3.5|-3.25|-3.0|-2.75|-2.5|-2.25|-2.0|-1.75|-1.5|-1.25|-1.0|-0.75|-0.5|-0.25|0.0)",
+        strict = "(true|false)", 
+        simtype = "(flu|kingman)",
+        res = "(0.3|0.35|0.4)",
+        rounds = "(1|2|3)",
+    shell:
+     """
+        julia -J polytomy_simulations.so --project=../../. ../PolytomyResolutionSimulations.jl --o "results/results_{wildcards.simtype}_{wildcards.res}_{wildcards.strict}_{wildcards.rounds}" --rec {wildcards.rec} --n {params.n_leaves} --sim {params.rounds} --simtype {wildcards.simtype} --strict {wildcards.strict} --res {wildcards.res} --rounds {wildcards.rounds} --krange false
+        julia -J polytomy_simulations.so --project=../../. ../PolytomyResolutionSimulations.jl --o "results/results_{wildcards.simtype}_{wildcards.res}_{wildcards.strict}_{wildcards.rounds}" --rec {wildcards.rec} --n {params.n_leaves} --sim {params.rounds} --simtype {wildcards.simtype} --strict {wildcards.strict} --res {wildcards.res} --rounds {wildcards.rounds} --metric rf --krange false
+     """
+
+rule plot_graphs:
+    input:
+        expand(["results/results_{simtype}_{res}_{strict}_{rounds}/results_correct_{rec}.txt", "results/results_{simtype}_{res}_{strict}_{rounds}/results_incorrect_{rec}.txt", "results/results_{simtype}_{res}_{strict}_{rounds}/results_rf_{rec}.txt",], rec=REC, strict=STRICT, res=RES, simtype=SIMTYPE, rounds=ROUNDS)
+    output:
+        "Plots.zip"
+    shell:
+        """
+        mkdir Plots
+        julia --project=../../. Rounds_Plots.jl
+        zip -rm Plots.zip Plots
+        """
+
+rule zip:
+    input:
+        expand(["results/results_{simtype}_{res}_{strict}_{rounds}/results_correct_{rec}.txt", "results/results_{simtype}_{res}_{strict}_{rounds}/results_incorrect_{rec}.txt", "results/results_{simtype}_{res}_{strict}_{rounds}/results_rf_{rec}.txt",], rec=REC, strict=STRICT, res=RES, simtype=SIMTYPE, rounds=ROUNDS),
+        "Plots.zip"
+    output:
+        "results.zip"
+    shell:
+        """
+        zip -rm results.zip results
+        """

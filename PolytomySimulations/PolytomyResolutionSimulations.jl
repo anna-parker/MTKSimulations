@@ -1,0 +1,251 @@
+using TreeKnit
+using TreeKnit.MTK
+using TreeTools
+using ArgParse
+using StatsBase 
+using MTKTools
+
+function write_output(outfolder, data_correct, data_incorrect, rec_rate; k_range=2:8)
+    if !isdir(outfolder)
+        mkdir(outfolder)
+    end
+    filename_correct = "results_correct_"*string(rec_rate)*".txt"
+    filename_incorrect = "results_incorrect_"*string(rec_rate)*".txt"
+    for (filename, data_full) in zip([filename_correct, filename_incorrect], [data_correct, data_incorrect])
+        write_output_to_file(outfolder*"/"*filename, data_full; k_range)
+    end
+end
+
+function write_output_to_file(filename, full_data; k_range=2:8)
+    open(filename, "w") do io
+        write(io, "k\tlCI\tuCI\tmean\tmedian\n")
+        for k in k_range
+            data = full_data[k]
+            write(io, string(k) *"\t"*string(data["lCI"])*"\t"*string(data["uCI"])*"\t"*string(data["mean"])*"\t"*string(data["median"])*"\n")
+        end
+    end
+end
+
+function parse_commandline()
+    s = ArgParseSettings()
+
+    @add_arg_table s begin
+        "--n"
+            help = "sample size at time 0 (Int)"
+            arg_type = Int
+            default = 50
+        "--rec"
+            help = "recombination rate ratio to coalescence (Float)"
+            arg_type = Float64
+            default = 0.0
+        "--o"
+            help = "output directory"
+            arg_type = String
+            default = "results"
+        "--sim"
+            help = "number of simulations"
+            arg_type = Int
+            default = 10
+        "--metric"
+            help = "use RF distance as metric"
+            arg_type = String
+            default = "splits"
+        "--simtype"
+            help = "simulate under flu or kingman model"
+            arg_type = String
+            default = "flu"
+        "--res"
+            help = "rate of resolution"
+            arg_type = Float64
+            default = 0.3
+        "--strict"
+            help = "strict or liberal resolve"
+            arg_type = Bool
+            default = true
+        "--rounds"
+            help = "number of rounds"
+            arg_type = Int
+            default = 2
+        "--krange"
+            help = "if full 2:8 (true) or [2,4,8] (false)"
+            arg_type = Bool
+            default = true
+    end
+
+    return parse_args(s)
+end
+
+function new_split_accuracy(true_trees, unres_trees, infered_trees)
+    @assert length(true_trees) == length(infered_trees) == length(unres_trees)
+    no_trees = length(true_trees)
+    correct_new_splits_trees = []
+    incorrect_new_splits_trees = []
+    for i in 1:no_trees
+        true_splits = SplitList(true_trees[i])
+        unres_splits = SplitList(unres_trees[i])
+        test_splits = SplitList(infered_trees[i])
+
+        no_true_splits = length(true_splits)
+        no_unres_splits = length(unres_splits)
+        missing_splits = no_true_splits - no_unres_splits + 1
+        @assert missing_splits >0 
+        correct_new_splits = 0
+        incorrect_new_splits = 0
+        for s in test_splits
+            if s ∈ true_splits && s ∉ unres_splits
+                correct_new_splits +=1
+            elseif s ∉ true_splits && s ∉ unres_splits
+                incorrect_new_splits +=1 
+            end
+        end
+        append!(correct_new_splits_trees, correct_new_splits/missing_splits)
+        append!(incorrect_new_splits_trees, incorrect_new_splits/missing_splits)
+    end
+    return correct_new_splits_trees, incorrect_new_splits_trees
+end
+
+function new_tree_RF_dist(true_trees, test_trees)
+    @assert length(true_trees) == length(test_trees)
+    no_trees = length(true_trees)
+    rf = []
+    for i in 1:no_trees
+        append!(rf, TreeTools.RF_distance(true_trees[i], test_trees[i]))
+    end
+    return rf
+end
+
+function run_tree_poly_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; simtype = :flu, res=0.3, strict=true, k_range=2:8, rounds)
+    r = 10^rec_rate
+    percent_correct_new_splits_vector = Dict()
+    percent_incorrect_new_splits_vector = Dict()
+
+    percent_correct_new_splits_i = Dict{Int, Vector{Float32}}()
+    percent_incorrect_new_splits_i = Dict{Int, Vector{Float32}}()
+    
+    for i in 1:no_sim
+        c = get_c(res, rec_rate; n=no_lineages, simtype)
+        true_trees, arg = MTKTools.get_trees(8, no_lineages; c, ρ = r, simtype)
+        for no_trees in k_range
+            rand_order = sample(1:8, no_trees, replace = false)
+            unresolved_trees = [copy(t) for t in true_trees[rand_order]]
+            unresolved_trees = MTKTools.remove_branches(unresolved_trees; c)
+
+            i_trees = [copy(t) for t in unresolved_trees]
+            i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, consistent = false, parallel=true, strict, rounds))
+            
+            loc = rand(1:no_trees)
+            correct_new_splits_i, incorrect_new_splits_i = new_split_accuracy([true_trees[rand_order][loc]], [unresolved_trees[loc]], [i_trees[loc]])
+            
+            if !haskey(percent_correct_new_splits_i, no_trees)
+                percent_correct_new_splits_i[no_trees] = [correct_new_splits_i[1]]
+            else
+                append!(percent_correct_new_splits_i[no_trees], correct_new_splits_i[1])
+            end
+            if !haskey(percent_incorrect_new_splits_i, no_trees)
+                percent_incorrect_new_splits_i[no_trees] = [incorrect_new_splits_i[1]]
+            else
+                append!(percent_incorrect_new_splits_i[no_trees], incorrect_new_splits_i[1])
+            end
+        end
+    end
+    CI_new_splits_correct = []
+    CI_new_splits_incorrect = []
+    for no_trees in k_range
+        cs_ = sort(percent_correct_new_splits_i[no_trees])
+        ics_ = sort(percent_incorrect_new_splits_i[no_trees])
+        CI_new_splits_correct = [cs_[Int(round(no_sim*0.05))+1], cs_[Int(round(no_sim*0.95))]]
+        CI_new_splits_incorrect = (ics_[Int(round(no_sim*0.05))+1], ics_[Int(round(no_sim*0.95))])
+        correct_data = Dict("lCI" =>CI_new_splits_correct[1], "mean" => sum(percent_correct_new_splits_i[no_trees])/no_sim, "uCI" =>CI_new_splits_correct[2], "median" => cs_[Int(round(no_sim*0.5))] )
+        incorrect_data = Dict("lCI" =>CI_new_splits_incorrect[1], "mean" => sum(percent_incorrect_new_splits_i[no_trees])/no_sim, "uCI" =>CI_new_splits_incorrect[2], "median" => ics_[Int(round(no_sim*0.5))] )
+        
+        percent_correct_new_splits_vector[no_trees] = correct_data
+        percent_incorrect_new_splits_vector[no_trees] = incorrect_data
+    end  
+    return  percent_correct_new_splits_vector, percent_incorrect_new_splits_vector
+end
+
+function run_tree_rf_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; simtype = :flu, res=0.3, strict=true, k_range=2:8, rounds=2)
+    r = 10^rec_rate
+    rf_change_info = Dict()
+    rf_change_vector = Dict()
+    
+    for i in 1:no_sim
+        c = get_c(res, rec_rate; n=no_lineages, simtype)
+        true_trees, arg = MTKTools.get_trees(8, no_lineages; c, ρ = r, simtype)
+        for no_trees in k_range
+            rand_order = sample(1:8, no_trees, replace = false)
+            unresolved_trees = [copy(t) for t in true_trees[rand_order]]
+            unresolved_trees = MTKTools.remove_branches(unresolved_trees; c)
+
+            i_trees = [copy(t) for t in unresolved_trees]
+            i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;consistent = false, parallel=true, strict, rounds))
+            
+            loc = rand(1:no_trees)
+            old_rf = new_tree_RF_dist([true_trees[rand_order][loc]], [unresolved_trees[loc]])
+            new_rf = new_tree_RF_dist([true_trees[rand_order][loc]], [i_trees[loc]])
+
+            if old_rf[1] != 0
+                change = (old_rf[1] - new_rf[1])/old_rf[1]
+            else
+                change = (old_rf[1] - new_rf[1])
+            end
+
+            if !haskey(rf_change_vector, no_trees)
+                rf_change_vector[no_trees] = [change]
+            else
+                append!(rf_change_vector[no_trees], [change])
+            end
+        end
+    end
+
+    for no_trees in k_range
+        change_vector = sort(rf_change_vector[no_trees])
+        CI = [change_vector[Int(round(no_sim*0.05))+1], change_vector[Int(round(no_sim*0.95))]]
+        dict = Dict("lCI" =>CI[1], "mean" => sum(change_vector)/no_sim, "uCI" =>CI[2], "median" => change_vector[Int(round(no_sim*0.5))] )
+
+        rf_change_info[no_trees] = dict
+    end  
+    return  rf_change_info
+end
+
+function main()
+    parsed_args = parse_commandline()
+    n = parsed_args["n"]
+    r = parsed_args["rec"]
+    o = parsed_args["o"]
+    num_sim = parsed_args["sim"]
+    metric = parsed_args["metric"]
+    simt = parsed_args["simtype"]
+    res = parsed_args["res"]
+    strict = parsed_args["strict"]
+    rounds = parsed_args["rounds"]
+    k_range_ = parsed_args["krange"]
+    if simt=="flu"
+        simtype = :flu
+    else
+        simtype = :kingman
+    end
+    if k_range_
+        k_range = 2:8
+    else
+        k_range = [2,4,8]
+    end
+    # n = 10
+    # r = 0.0
+    # o = "results_test"
+    # num_sim = 10
+    # metric = "splits"
+    println("Simulating ARGs and sequences of sample size $n and recombination rate $r and k_range in $k_range")
+    if metric=="rf"
+        rf_info = run_tree_rf_accuracy_simulations(num_sim, n, r; simtype, res, strict, rounds, k_range)
+        if !isdir(o)
+            mkdir(o)
+        end
+        write_output_to_file(o*"/results_rf_"*string(r)*".txt", rf_info; k_range)
+    else
+        percent_correct_new_splits_vector, percent_incorrect_new_splits_vector = run_tree_poly_accuracy_simulations(num_sim, n, r; simtype, res, strict, rounds, k_range)
+        write_output(o, percent_correct_new_splits_vector, percent_incorrect_new_splits_vector, r; k_range)
+    end
+end
+
+main()
