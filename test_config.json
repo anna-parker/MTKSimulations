@@ -1,0 +1,17 @@
+{
+  "REC" : [
+    "-4.0"
+],
+    "SIMTYPE": [
+        "flu"
+    ],
+    "RES": [
+        "0.4"
+    ],
+    "STRICT": [
+        "true"
+    ],
+    "n": 50,
+    "sim": 10,
+    "SEGMENTS": 8
+}
