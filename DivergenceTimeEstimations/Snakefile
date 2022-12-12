@@ -1,0 +1,101 @@
+configfile: "div_times_config.json"
+REC = config.get("REC")
+SIMTYPE = config.get("SIMTYPE")
+RES = config.get("RES")
+STRICT = config.get("STRICT")
+ROUNDS = config.get("sim")
+SEGMENTS = config.get("SEGMENTS")
+
+dict_REC = {}
+for no, rec in enumerate(REC):
+    dict_REC[str(no)] = rec
+
+rule all:
+    input:
+        "results.zip"
+
+rule precompile_script:
+    message:
+        "precompile julia script"
+    output:
+        "arg_simulations.so",
+    shell:
+        """
+        julia --project=../. build_sys_image.jl
+        rm -r results
+        """
+
+rule run_simulations:
+    message:
+        "start simulations in julia"
+    input:
+        "arg_simulations.so"
+    output:
+        expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{{n}}/{k}.nwk"], k=range(2, SEGMENTS)),
+        expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{{n}}/true_segment_{k}.nwk"], k=range(2, SEGMENTS)),
+        expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{{n}}/{k}.fasta"], k=range(2, SEGMENTS)),
+        expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{{n}}/{k}/MCCs.json"], k=range(2, SEGMENTS))
+    params:
+        rec=lambda wcs: dict_REC[wcs.key],
+        n_leaves = config.get("n"),
+    wildcard_constraints:
+        key = "[0-9]+",
+        n = "([0-9]+)",
+        strict = "(true|false)", 
+        simtype = "(flu|kingman)",
+        res = "(0.3|0.35|0.4)",
+    shell:
+        """
+        julia -J arg_simulations.so --project=../. ARGSimulations.jl --rec {params.rec} --o sim_{wildcards.simtype}_{wildcards.res}_{wildcards.strict}/sim_{wildcards.key}_{wildcards.n} --n {params.n_leaves} --simtype {wildcards.simtype} --res {wildcards.res} --strict {wildcards.strict}
+        """
+
+rule test_treetime_inference:
+    message:
+        "start treetime inference"
+    input: 
+       expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{n}/{k}.nwk"], k=range(2, SEGMENTS), n=range(ROUNDS)),
+       expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{n}/true_segment_{k}.nwk"], k=range(2, SEGMENTS), n=range(ROUNDS)),
+       expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{n}/{k}.fasta"], k=range(2, SEGMENTS), n=range(ROUNDS)),
+       expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{n}/{k}/MCCs.json"], k=range(2, SEGMENTS), n=range(ROUNDS))
+
+    output: 
+        expand(["results/results_{{simtype}}_{{res}}_{{strict}}/tt_summary_{{key}}_{k}.csv"], k=range(2, SEGMENTS))
+    params:
+        rec=lambda wcs: dict_REC[wcs.key],
+        rounds = ROUNDS
+    wildcard_constraints:
+        key = "[0-9]+",
+        k = "([0-9]+)",
+        n = "([0-9]+)",
+        strict = "(true|false)", 
+        simtype = "(flu|kingman)",
+        res = "(0.3|0.35|0.4)",
+    shell:
+        """
+        python treetime_arg_test.py -i sim_{wildcards.simtype}_{wildcards.res}_{wildcards.strict} -o results/results_{wildcards.simtype}_{wildcards.res}_{wildcards.strict} -k {wildcards.key} -n {params.rounds}
+        rm -r sim_{wildcards.simtype}_{wildcards.res}_{wildcards.strict}/sim_{wildcards.key}_*
+        """
+
+
+rule plot_graphs:
+    input:
+        expand(["results/results_{simtype}_{res}_{strict}/tt_summary_{key}_{k}.csv"], k=range(2, SEGMENTS), key=dict_REC.keys(), simtype=SIMTYPE, res=RES, strict=STRICT)
+    output:
+        "Plots.zip"
+    shell:
+        """
+        mkdir Plots
+        julia --project=../. Plot.jl
+        zip -rm Plots.zip Plots
+        """
+
+rule zip:
+    input:
+        expand(["results/results_{simtype}_{res}_{strict}/tt_summary_{key}_{k}.csv"], k=range(2, SEGMENTS), key=dict_REC.keys(), simtype=SIMTYPE, res=RES, strict=STRICT),
+        "Plots.zip"
+    output:
+        "results.zip"
+    shell:
+        """
+        zip -rm results.zip results
+        """
