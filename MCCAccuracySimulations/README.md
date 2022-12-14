@@ -10,9 +10,13 @@ The MCC Accuracy Simulation pipeline assesses the improvement in MCC inference w
 6. Plot results.
 7. Remove unnecessary files and zip output files.
 
+#### Rounds Pipeline
+
+This directory also contains a subdirectory with a pipeline to assess the impact of multiple rounds on MCC inference - the same technique is employed as above except that now the number of rounds used in MultiTreeKnit is an additional parameter. TreeKnit allows users to set the number of rounds of inference - if rounds is set to greater than 1 after the initial MCC inference and tree pair resolution TreeKnit will use the resolved trees from the previous round as input and the computed MCCs as a consistency constraint (if `consistent = true`) for this round of MCC inference and tree resolution.
+
 ## MCC measures
 
-MCCs can be viewed as a clustering of leaves. We assess the accuracy of inferred MCCs by their similarity to true MCCs by using a number of clustering metrics. The two most widely used methods are the Rand index / Rand distance and the VI index / VI distance. All distances are normalized to be on the scale of 0 to 1, where 0 means no distance or the same distribution. We also compute the homogenity and completeness of the inferred MCCs which allows us to better quantify the clustering properties of the inference.
+MCCs can be viewed as a clustering of leaves. We assess the accuracy of inferred MCCs by their similarity to true MCCs by using a number of clustering metrics. The two most widely used methods are the Rand index / Rand distance and the VI index / VI distance. All distances are normalized to be on the scale of 0 to 1, where 0 means no distance or the same distribution. We also compute the homogenity and completeness of the inferred MCCs which allows us to better quantify the clustering properties of the inference. All these measures are computed using the julia [Clustering.jl](https://juliastats.org/Clustering.jl/dev/validate.html) package. 
 
 #### Rand distance
 
