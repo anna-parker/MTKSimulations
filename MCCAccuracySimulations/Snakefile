@@ -4,7 +4,7 @@ SIMTYPE = config.get("SIMTYPE")
 RES = config.get("RES")
 STRICT = config.get("STRICT")
 
-METRIC =["rand", "VI"]
+METRIC =["v-measure-complete", "v-measure-homogenity"]
 
 rule all:
     input:
@@ -33,7 +33,7 @@ rule run_simulations:
         rounds  = config.get("sim"),
     wildcard_constraints:
         rec = "(-4.0|-3.75|-3.5|-3.25|-3.0|-2.75|-2.5|-2.25|-2.0|-1.75|-1.5|-1.25|-1.0|-0.75|-0.5|-0.25|0.0)",
-        m = "(rand|VI)",
+        m = "(rand|VI|v-measure-complete|v-measure-homogenity)",
         strict = "(true|false)", 
         simtype = "(flu|kingman)",
         res = "(0.3|0.35|0.4)",

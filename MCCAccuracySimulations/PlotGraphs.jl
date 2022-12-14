@@ -3,7 +3,9 @@ using CSV
 using DataFrames
 using JSON3
 
-json_string = read("../config.json", String)
+METRIC = ["v-measure-complete", "v-measure-homogenity"]
+
+json_string = read("mcc_config.json", String)
 
 params = JSON3.read(json_string)
 
@@ -14,7 +16,7 @@ x_ticks= [round(10^e, digits=4) for e in range(-4, 0, 5)]
 for sim in params["SIMTYPE"]
     for res in params["RES"]
         for strict in params["STRICT"]
-            for metric in ["VI", "rand"]
+            for metric in METRIC
                 _mean = Dict()
                 for rec in params["REC"]
                     filename = "results/results_"*sim*"_"*res*"_"*strict*"/results_standard_"*metric*"_"*string(rec)*".txt"

@@ -5,6 +5,7 @@ using TreeKnit.MTK
 using TestRecombTools
 using ArgParse
 using StatsBase
+using Clustering
 
 
 function parse_commandline()
@@ -28,7 +29,7 @@ function parse_commandline()
             arg_type = Int
             default = 10
         "--metric"
-            help = "which accuracy measure - rand, VI"
+            help = "which accuracy measure - rand, VI, v-measure-complete, v-measure-homogenity"
             arg_type = String
             default = "VI"
         "--simtype"
@@ -74,6 +75,30 @@ function write_output_to_file(filename, full_data; k_range=2:8)
     end
 end
 
+function v_measure_similarity(MCCs...; scale=true, β = 1)
+	leaves = sort(vcat(first(MCCs)...))
+	assignments = try
+		[TestRecombTools.assignment_vector(leaves, mccs) for mccs in MCCs]
+	catch err
+		println(MCCs[1])
+		println()
+		println(MCCs[2])
+		println()
+		println(leaves)
+		error(err)
+	end
+	out = 0
+	Z = 0
+	for i in 1:length(MCCs), j in (i+1):length(MCCs)
+		out += Clustering.vmeasure(assignments[i], assignments[j]; β)
+		Z += 1
+	end
+	if scale
+		out /= log(length(leaves))
+	end
+	return out / Z
+end
+
 function run_MCC_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; type="VI", strict=true, simtype=:flu, res=0.3, k_range=2:8, rounds=2)
     r = 10^rec_rate
     average_accuracy_i = Dict()
@@ -97,6 +122,10 @@ function run_MCC_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::F
 
             if type=="VI"
                 a_index_i = TestRecombTools.varinfo_similarity(TreeKnit.get(rMCCs, names...), TreeKnit.get(i_MCCs, names...))
+            elseif type=="v-measure-complete" ##higher values means more similar and complete
+                a_index_i = v_measure_similarity(TreeKnit.get(i_MCCs, names...), TreeKnit.get(rMCCs, names...); β = 0)
+            elseif type=="v-measure-homogenity"
+                a_index_i = v_measure_similarity(TreeKnit.get(rMCCs, names...), TreeKnit.get(i_MCCs, names...); β = 0)
             else
                 a_index_i = TestRecombTools.rand_index_similarity(TreeKnit.get(rMCCs, names...), TreeKnit.get(i_MCCs, names...))
             end
