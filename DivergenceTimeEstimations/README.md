@@ -26,3 +26,25 @@ Assume the simple case where we have taken a $K=2$ subsample of segment trees, a
 Again, assume the simple case where we have taken a $K=2$ subsample of segment trees, and we are trying to optimize `tree 1` using `tree 2`, the sequence information of the leaves of `tree 1` and `tree 2`, as well as their `MCC` information. But now assume that a reassortment event has occured "on branch $b$" (technically above the node that corresponds to branch $b$). When a reassortment event happens on a branch the information from the other segment cannot be used when infering the branch length in the current segment tree, leading to a standard error of $$\frac{1}{\sqrt{\mu L N}}$$ - which is the same as when the other segment tree is not used. 
 
 In conclusion, the inference improvement should be proportional to the number of recombination sites. When there are many recombination sites there is not much additional information gain from the other tree and the standard error of infered divergence times should be similar to the original TreeTime approach. However, when recombination happens infrequently there should still be an improvement. As a branch either has a recombination or not the standard error of these measurements can be determined from the fraction of branches with recombination and without recombination. Assuming recombination happens on one branch in a tree independently of other branches (not true sadly as larger branches are more likely to have recombination events) the standard error of of branch estimates should be approximately $$\frac{\sigma}{N} \sqrt{\frac{N_{rec}}{L_{HA}} + \frac{N_{norec}}{(L_{HA}+ L_{NA})}}$$.
+
+## Selected Results
+
+We see the expected improvement in the standard error of divergence times estimations - seen here with the variance of the normalized difference between the true and estimated branch length (normalized by the square root of the true branch length). As expected for low reassortment rate in both the Kingman and flu model the variance decreases by a factor of $K$. 
+
+<img src="Figures/var_divergence_times_flu_0.35_true.png" width="49%"/> <img src="Figures/var_divergence_times_kingman_0.35_true.png" width="49%"/> 
+
+<em>Left: ARGs simulated under flu coalescence model, resolution rate 0.35 and strict resolve, Right: ARGs ARGs simulated under kingman coalescence model, resolution rate 0.35 and strict resolve,</em>
+
+As to be expected this improvement starts decreasing faster with trees simulated under the Kingman model - most likely due to the fact that Kingman trees have more reassortments and thus less shared branches than Flu trees even with the same reassortment rate (see explanation in the `AccuracySharedBranches` section).
+
+We note that although no branches are removed in this simulation for better comparison of the final trees - mutations occur at a rate that is proportional to the resolution rate - i.e the number of branches with no mutations would result in trees with a 0.35 resolution rate if internal branches with no mutations were to be removed. This can be seen when we look at the median and mean difference in inferred branch length. For $K=1$ the median difference is 1 - this makes sense as at resolution rate 0.35 the major of branches will not have mutations and will have inferred branch length 0. The decrease in difference with increasing $K$ shows the impact of using sequence information from other trees - made possible with the ARG module in TreeTime. 
+
+<img src="Figures/median_divergence_times_flu_0.35_true.png" width="49%"/> <img src="Figures/median_divergence_times_kingman_0.35_true.png" width="49%"/> 
+
+<em>Left: ARGs simulated under flu coalescence model, resolution rate 0.35 and strict resolve, Right: ARGs ARGs simulated under kingman coalescence model, resolution rate 0.35 and strict resolve,</em>
+
+<img src="Figures/mean_divergence_times_flu_0.35_true.png" width="49%"/> <img src="Figures/mean_divergence_times_kingman_0.35_true.png" width="49%"/> 
+
+<em>Left: ARGs simulated under flu coalescence model, resolution rate 0.35 and strict resolve, Right: ARGs ARGs simulated under kingman coalescence model, resolution rate 0.35 and strict resolve,</em>
+
+We also note the large outliers seen for higher reassortment rates in the mean branch length differences. This is most likely due to the impact of FP shared branches - however more simulations would be needed to properly assess this. 
