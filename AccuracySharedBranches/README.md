@@ -9,3 +9,38 @@ The Accuracy Shared Branches pipeline assesses the improvement in identifying br
 5. Write a summary of results to a txt file.
 6. Plot results.
 7. Remove unnecessary files and zip output files.
+
+## Selected Results
+
+In all cases using more segments allows the identification of more shared and unshared branches in trees. The total number of shared branches that can be identified using 8 segments is related to the resolution rate of the trees. More resolved trees lead to more branches being correctly identified. 
+
+<img src="Figures/Percentage_shared_branches_flu_0.3_true.png" width="49%"/> <img src="Figures/Percentage_shared_branches_flu_0.4_true.png" width="49%"/> 
+
+<em>Left: ARGs simulated under flu coalescence model and resolution rate 0.3 and strict resolve, Right: ARGs simulated under flu coalescence model and resolution rate 0.4 and strict resolve</em>
+
+
+The structure of the curves is related to the composition of the trees - using Kingman trees the decrease in TP branches is less steep than in flu trees - this is most likely due to the fact that the coalescence rate in kingman trees is quadratic in the number of leaves, whereas the coalescence rate in flu is almost log linear. 
+
+The reassortment rate is set to be proportional to the coalescence rate at time $t_0$, which means that at later times (internally) the ARG has a higher reassortment rate (relative to coalescence rate) in the Kingman model than in the flu model. For the 8 segment case at time $t$ assume that $$n_r(t) \approx n_c(t) < n_c(t_0) = n_r(t_0)$$ (for the 8 segment case this is quite likely: $n_r(t) < n_c(t)$ will only occur if a reassortment event has happened above the same node multiple times or if a reassortment event only splits off one segment). The ratio of the reassortment rate and coalescence rate in the Kingman model at time $t$ is:$$\frac{\frac{\rho n_c(t_0) n_c(t)}{2 N}}{\frac{n_c(t)(n_c(t) - 1)}{2 N}} \approx \rho  \frac{n_c(t_0)}{n_c(t)}$$ 
+The ratio of the reassortment rate and coalescence rate in the flu model at time $t$ is:$$\frac{\frac{\rho n_c(t_0)^{0.2} n_c(t)}{2^(0.2) N}}{\frac{n_c(t)^{0.2}(n_c(t) - 1)}{2^(0.2) N}} \approx \rho  (\frac{n_c(t_0)}{n_c(t)})^{0.2}$$ 
+See [ARGTools](https://github.com/PierreBarrat/ARGTools) for an exact derivation of coalescence and reassortment rates. this can be seen in the graphs below - where even at the same resolution rate the Kingman model has a smaller amount of shared branches. 
+
+<img src="Figures/Percentage_shared_branches_flu_0.3_true.png" width="49%"/> <img src="Figures/Percentage_shared_branches_kingman_0.3_true.png" width="49%"/> 
+
+<em>Left: ARGs simulated under flu coalescence model and resolution rate 0.3 and strict resolve, Right: ARGs simulated under kingman coalescence model and resolution rate 0.3 and strict resolve</em>
+
+The main difference between using strict vs liberal resolve is the number of incorrectly labeled branches. The number of FP branches (branches which are incorrectly labeled as shared) goes up when liberal resolve is used - the total number of TP stays relatively consistent. The number of FN and TN increases with liberal resolve - however this is most likely just due to the fact that strict resolve on average resolves less branches - especially branches which are not shared between a tree pair. 
+
+<img src="Figures/Percentage_shared_branches_flu_0.3_true.png" width="49%"/> <img src="Figures/Percentage_shared_branches_flu_0.3_false.png" width="49%"/> 
+<em>Left: ARGs simulated under flu coalescence model and resolution rate 0.3 and strict resolve, Right: ARGs simulated under flu coalescence model and resolution rate 0.3 and liberal resolve</em>
+
+<img src="Figures/Percentage_not_shared_branches_flu_0.3_true.png" width="49%"/> <img src="Figures/Percentage_not_shared_branches_flu_0.3_false.png" width="49%"/> 
+<em>Left: ARGs simulated under flu coalescence model and resolution rate 0.3 and strict resolve, Right: ARGs simulated under flu coalescence model and resolution rate 0.3 and liberal resolve</em>
+
+Using the `consistent` flag has little impact on the results. 
+
+<img src="Figures/Percentage_shared_branches_flu_0.3_true.png" width="49%"/> <img src="Figures/Percentage_shared_branches_flu_0.3_true_consistent.png" width="49%"/> 
+<em>Left: ARGs simulated under flu coalescence model and resolution rate 0.3 and strict resolve, Right: ARGs simulated under flu coalescence model and resolution rate 0.3, strict resolve and the consistent flag</em>
+
+<img src="Figures/Percentage_not_shared_branches_flu_0.3_true.png" width="49%"/> <img src="Figures/Percentage_not_shared_branches_flu_0.3_true_consistent.png" width="49%"/> 
+<em>Left: ARGs simulated under flu coalescence model and resolution rate 0.3 and strict resolve, Right: ARGs simulated under flu coalescence model and resolution rate 0.3, strict resolve and the consistent flag</em>
