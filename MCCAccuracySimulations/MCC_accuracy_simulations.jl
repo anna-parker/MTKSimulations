@@ -6,6 +6,7 @@ using TestRecombTools
 using ArgParse
 using StatsBase
 using Clustering
+using Dagger
 
 
 function parse_commandline()
@@ -19,7 +20,7 @@ function parse_commandline()
         "--rec"
             help = "recombination rate ratio to coalescence (Float)"
             arg_type = Float64
-            default = 0.0
+            default = -4.0
         "--o"
             help = "output directory"
             arg_type = String
@@ -99,42 +100,54 @@ function v_measure_similarity(MCCs...; scale=true, β = 1)
 	return out / Z
 end
 
-function run_MCC_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; type="VI", strict=true, simtype=:flu, res=0.3, k_range=2:8, rounds=2)
-    r = 10^rec_rate
-    average_accuracy_i = Dict()
+function run_one_sim(no_lineages::Int, rec_rate::Float64, type, strict, simtype, res, k_range, rounds)
+    a_index_i_vector = Dict()
     
+    c = get_c(res, rec_rate; n=no_lineages, simtype)
+    r = 10^rec_rate
+    true_trees, arg = MTKTools.get_trees(8, no_lineages; c, ρ = r, simtype)
+    rMCCs = MTKTools.get_real_MCCs(8, arg)
+    rMCCs = TreeKnit.MCC_set(8, [t.label for t in true_trees], rMCCs)
+    for no_trees in k_range
+        rand_order = sample(1:8, no_trees, replace = false)
+        unresolved_trees = [copy(t) for t in true_trees[rand_order]]
+        unresolved_trees = MTKTools.remove_branches(unresolved_trees; c)
+
+        i_trees = [copy(t) for t in unresolved_trees]
+        i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, consistent = false, parallel=false, strict, rounds))
+        loc = sample(1:no_trees, 2, replace = false)
+        names = [t.label for t in true_trees[rand_order][loc]]
+
+        if type=="VI"
+            a_index_i = TestRecombTools.varinfo_similarity(TreeKnit.get(rMCCs, names...), TreeKnit.get(i_MCCs, names...))
+        elseif type=="v-measure-complete" ##higher values means more similar and complete
+            a_index_i = v_measure_similarity(TreeKnit.get(i_MCCs, names...), TreeKnit.get(rMCCs, names...); β = 0)
+        elseif type=="v-measure-homogenity"
+            a_index_i = v_measure_similarity(TreeKnit.get(rMCCs, names...), TreeKnit.get(i_MCCs, names...); β = 0)
+        else
+            a_index_i = TestRecombTools.rand_index_similarity(TreeKnit.get(rMCCs, names...), TreeKnit.get(i_MCCs, names...))
+        end
+        
+        a_index_i_vector[no_trees] = a_index_i
+    end
+
+    return a_index_i_vector
+end
+
+function run_MCC_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; type="VI", strict=true, simtype=:flu, res=0.3, k_range=2:8, rounds=2)
+    average_accuracy_i = Dict()
     accuracy_index_i = Dict{Int, Vector{Float32}}()
-
+    sim_results = Dict()
     for i in 1:no_sim
-        c = get_c(res, rec_rate; n=no_lineages, simtype)
-        true_trees, arg = MTKTools.get_trees(8, no_lineages; c, ρ = r, simtype)
-        rMCCs = MTKTools.get_real_MCCs(8, arg)
-        rMCCs = TreeKnit.MCC_set(8, [t.label for t in true_trees], rMCCs)
+        sim_results[i] = Dagger.@spawn run_one_sim(no_lineages, rec_rate, type, strict, simtype, res, k_range, rounds)
+    end
+    for no_trees in k_range
+        accuracy_index_i[no_trees] = Float32[]
+    end
+    for i in 1:no_sim
+        sim_result = fetch(sim_results[i])
         for no_trees in k_range
-            rand_order = sample(1:8, no_trees, replace = false)
-            unresolved_trees = [copy(t) for t in true_trees[rand_order]]
-            unresolved_trees = MTKTools.remove_branches(unresolved_trees; c)
-
-            i_trees = [copy(t) for t in unresolved_trees]
-            i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, consistent = false, parallel=true, strict, rounds))
-            loc = sample(1:no_trees, 2, replace = false)
-            names = [t.label for t in true_trees[rand_order][loc]]
-
-            if type=="VI"
-                a_index_i = TestRecombTools.varinfo_similarity(TreeKnit.get(rMCCs, names...), TreeKnit.get(i_MCCs, names...))
-            elseif type=="v-measure-complete" ##higher values means more similar and complete
-                a_index_i = v_measure_similarity(TreeKnit.get(i_MCCs, names...), TreeKnit.get(rMCCs, names...); β = 0)
-            elseif type=="v-measure-homogenity"
-                a_index_i = v_measure_similarity(TreeKnit.get(rMCCs, names...), TreeKnit.get(i_MCCs, names...); β = 0)
-            else
-                a_index_i = TestRecombTools.rand_index_similarity(TreeKnit.get(rMCCs, names...), TreeKnit.get(i_MCCs, names...))
-            end
-            
-            if !haskey(accuracy_index_i, no_trees)
-                accuracy_index_i[no_trees] = [a_index_i]
-            else
-                append!(accuracy_index_i[no_trees], a_index_i)
-            end
+            push!(accuracy_index_i[no_trees], sim_result[no_trees])
         end
     end
     for no_trees in k_range
@@ -156,6 +169,8 @@ function main()
     # simt = "flu"
     # res = 0.3
     # strict = true
+    # rounds = 2
+    # krange_ = true
     parsed_args = parse_commandline()
     n = parsed_args["n"]
     r = parsed_args["rec"]
