@@ -7,7 +7,7 @@ To read more about how TreeKnit works please refer to the paper:
 Pierre Barrat-Charlaix, Timothy G. Vaughan, Richard A. Neher bioRxiv 2021.12.20.473456; doi: https://doi.org/10.1101/2021.12.20.473456*. 
 
 
-### Installation
+## Installation
 
 I use multiple julia packages which are not registered and additionally use a non-master branch of TreeKnit. Thus, to avoid installation issues I always install julia packages using the following commands:
 
@@ -22,6 +22,7 @@ Pkg.add("Combinatorics")
 Pkg.add("StatsBase")
 Pkg.add("Distributions")
 Pkg.add("Dagger")
+Pkg.add("Clustering")
 ## branch of TreeKnit with MultiTreeKnit module
 Pkg.add(url="https://github.com/PierreBarrat/TreeKnit.jl", rev="MTK_clean")
 ## modules needed for TestRecombTools - package with MCC metrics designed by Pierre
@@ -45,7 +46,7 @@ Incase an error occurs the `feat/multiTK_arg` branch of `treetime` should be use
 ```
 pip install https://github.com/neherlab/treetime/archive/feat/multiTK_arg.zip
 ```
-### Simulations
+## Simulations
 
 As I performed most simulations on a cluster I have included a bash script for launching simulations in SLURM- note that I use parallel TreeKnit which requires all computatiosn to be performed on one node. Simulations are managed by the Snakemake file in each simulation folder - with parameters in the `config.json` file. The general set up is: 
  - Simulate 8 segment ARGs with ARGTools with these parameters. ARGs map to true MCCs and true trees of each segment.
@@ -54,19 +55,23 @@ As I performed most simulations on a cluster I have included a bash script for l
  - Plot results of simulations
  - remove unnecessary files, zip output files 
 
-#### 1. Accuracy of MCCs
+### 1. Accuracy of MCCs
 
 Assessment of MCC accuracy with VI and rand index. 
 
-#### 2. Accuracy of Resolved Polytomies
+### 2. Accuracy of Resolved Polytomies
 
 Using RF - distance improvement of tree and percentage of missing splits that are corrected or incorrectly added back to the tree.
 
-#### 3. Accuracy of Shared Branches
+### 3. Accuracy of Shared Branches
 
 Using percentage of branches that are correctly and incorrectly inferred to be shared amongst tree pairs.
 
-#### 4. Accuracy of Divergence Time Estimations
+### 4. Accuracy of Divergence Time Estimations
 
 Improvement of divergence time inference with [TreeTime](https://github.com/neherlab/treetime) when TreeKnit is used to infer shared branches and this information is used in ancestral sequence reconstruction and branch length/ divergence time inference. 
+
+### 5. Consistency of MCCs
+
+Make sure that the Maximally Compatible Clades found by TreeKnit fulfill all necessary conditions, e.g. they are topologically compatible and are consistent.
 

@@ -33,15 +33,39 @@ Furthermore, we actually know which exact splits are missing from the tree unres
 
 ## Selected Results
 
-The amount of polytomies that can be resolved is related to the resolution rate of the trees in the ARG - the more resolved the higher the percentage of missing polytomies that can be properly inferred. The number of incorrectly added branches is also related to the resolution rate. Again, the higher the resolution rate the less incorrect branches are added to the tree - leading to more accurate results. 
+The amount of polytomies that can be resolved is related to the resolution rate of the trees in the ARG - the more resolved the higher the percentage of missing polytomies that can be properly resolved. The number of incorrectly added branches is also related to the resolution rate. Again, the higher the resolution rate the less incorrect branches are added to the tree - leading to more accurate results. 
+
+<img src="Figures/PercentageCorrectResolution_flu_0.3_true.png" width="49%"/> <img src="Figures/PercentageCorrectResolution_flu_0.4_true.png" width="49%"/> 
+
+<em>Left: ARGs simulated under flu coalescence model and resolution rate 0.3 and strict resolve, Right: ARGs simulated under flu coalescence model and resolution rate 0.4 and strict resolve</em>
 
 The Kingman and flu simulation model lead to slightly different plot structures. The percentage of correctly determined branches decreases faster in Kingman than in flu - this is most likely due to the fact that the average number of reassortments is slightly higher in the Kingman model - leading to on average less shared branches between trees (if a branch is not shared with another tree, even if that tree is known no information from that other tree can be used to reconstruct it). For more information see the `AccuracySharedBranches` section. 
 
+<img src="Figures/PercentageCorrectResolution_flu_0.3_true.png" width="49%"/> <img src="Figures/PercentageCorrectResolution_kingman_0.3_true.png" width="49%"/> 
+
+<em>Left: ARGs simulated under flu coalescence model and resolution rate 0.3 and strict resolve, Right: ARGs simulated under kingman coalescence model and resolution rate 0.3 and strict resolve</em>
+
 There is a striking difference between liberal and strict resolve when it comes to the amount of incorrectly added branches. This is especially visible for less resolved trees and for higher recombination rates. 
+
+<img src="Figures/PercentageCorrectResolution_flu_0.3_true.png" width="49%"/> <img src="Figures/PercentageCorrectResolution_flu_0.3_false.png" width="49%"/> 
+
+<em>Left: ARGs simulated under flu coalescence model and resolution rate 0.3 and strict resolve, Right: ARGs simulated under flu coalescence model and resolution rate 0.3 and liberal resolve</em>
 
 The RF distance plots are very similar to the split accuracy plots and as they convey less information I will only show two examples here. 
 
+<img src="Figures/PercentageRF_improvement_flu_0.4_true.png" width="49%"/> <img src="Figures/PercentageRF_improvement_flu_0.4_false.png" width="49%"/> 
+
+<em>Left: ARGs simulated under flu coalescence model and resolution rate 0.4 and strict resolve, Right: ARGs simulated under flu coalescence model and resolution rate 0.4 and liberal resolve</em>
+
 Again we note that the `consistent` parameter has little to no impact on our results. 
+
+<img src="Figures/PercentageCorrectResolution_flu_0.3_true.png" width="49%"/> <img src="Figures/PercentageCorrectResolution_flu_0.3_true_consistent.png" width="49%"/> 
+
+<em>Left: ARGs simulated under flu coalescence model and resolution rate 0.3 and strict resolve, Right: ARGs simulated under flu coalescence model and resolution rate 0.3, strict resolve and the consistent parameter</em>
+
+<img src="Figures/PercentageCorrectResolution_flu_0.3_false.png" width="49%"/> <img src="Figures/PercentageCorrectResolution_flu_0.3_false_consistent.png" width="49%"/> 
+
+<em>Left: ARGs simulated under flu coalescence model and resolution rate 0.3 and liberal resolve, Right: ARGs simulated under flu coalescence model and resolution rate 0.3, liberal resolve and the consistent parameter</em>
 
 When we look at the impact of the number of `rounds` used in TreeKnit we see that increasing the number of rounds actually has little impact on the number of correct splits - and the increase in correct splits is similar to the increase in incorrect splits - leading us to believe that increasing the number of rounds used is unlikely to be beneficial. 
 
