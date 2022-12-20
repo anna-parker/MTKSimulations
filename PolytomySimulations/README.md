@@ -30,3 +30,19 @@ In the plots we show the improvement in RF distance after the unresolved trees $
 #### New Split Accuracy
 
 Furthermore, we actually know which exact splits are missing from the tree unresolved tree and which are added by TreeKnit. This allows us to plot the fraction of missing splits that are correctly added back by TreeKnit and the fraction of incorrect splits (also scaled by the total number of missing splits for easier comparison).
+
+## Selected Results
+
+The amount of polytomies that can be resolved is related to the resolution rate of the trees in the ARG - the more resolved the higher the percentage of missing polytomies that can be properly inferred. The number of incorrectly added branches is also related to the resolution rate. Again, the higher the resolution rate the less incorrect branches are added to the tree - leading to more accurate results. 
+
+The Kingman and flu simulation model lead to slightly different plot structures. The percentage of correctly determined branches decreases faster in Kingman than in flu - this is most likely due to the fact that the average number of reassortments is slightly higher in the Kingman model - leading to on average less shared branches between trees (if a branch is not shared with another tree, even if that tree is known no information from that other tree can be used to reconstruct it). For more information see the `AccuracySharedBranches` section. 
+
+There is a striking difference between liberal and strict resolve when it comes to the amount of incorrectly added branches. This is especially visible for less resolved trees and for higher recombination rates. 
+
+The RF distance plots are very similar to the split accuracy plots and as they convey less information I will only show two examples here. 
+
+Again we note that the `consistent` parameter has little to no impact on our results. 
+
+When we look at the impact of the number of `rounds` used in TreeKnit we see that increasing the number of rounds actually has little impact on the number of correct splits - and the increase in correct splits is similar to the increase in incorrect splits - leading us to believe that increasing the number of rounds used is unlikely to be beneficial. 
+
+We also investigated the impact of the `pre-resolve` parameter as well as the `final-no-resolve` parameter.

@@ -21,6 +21,7 @@ Pkg.add("DataFrames")
 Pkg.add("Combinatorics")
 Pkg.add("StatsBase")
 Pkg.add("Distributions")
+Pkg.add("Dagger")
 ## branch of TreeKnit with MultiTreeKnit module
 Pkg.add(url="https://github.com/PierreBarrat/TreeKnit.jl", rev="MTK_clean")
 ## modules needed for TestRecombTools - package with MCC metrics designed by Pierre
