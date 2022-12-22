@@ -53,6 +53,18 @@ function parse_commandline()
             help = "if full 2:8 (true) or [2,4,8] (false)"
             arg_type = Bool
             default = true
+        "--final-no-resolve"
+            help = "default false"
+            arg_type = Bool
+            default = false
+        "--pre-resolve"
+            help = "default false"
+            arg_type = Bool
+            default = false
+        "--consistent"
+            help = "default false"
+            arg_type = Bool
+            default = false
     end
 
     return parse_args(s)
@@ -62,7 +74,7 @@ function write_output(outfolder, data_standard, type, rec_rate; k_range=2:8)
     if !isdir(outfolder)
         mkdir(outfolder)
     end
-    filename = "results_standard_"*type*"_"*string(rec_rate)*".txt"
+    filename = "results_"*type*"_"*string(rec_rate)*".txt"
     write_output_to_file(outfolder*"/"*filename, data_standard; k_range)
 end
 
@@ -115,7 +127,7 @@ function complete(a, b)
     return c
 end
 
-function run_one_sim(no_lineages::Int, rec_rate::Float64, type, strict, simtype, res, k_range, rounds)
+function run_one_sim(no_lineages::Int, rec_rate::Float64, type, strict, simtype, res, k_range, rounds, consistent, final_no_resolve, pre_resolve)
     a_index_i_vector = Dict()
     
     c = get_c(res, rec_rate; n=no_lineages, simtype)
@@ -129,7 +141,7 @@ function run_one_sim(no_lineages::Int, rec_rate::Float64, type, strict, simtype,
         unresolved_trees = MTKTools.remove_branches(unresolved_trees; c)
 
         i_trees = [copy(t) for t in unresolved_trees]
-        i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, consistent = false, parallel=false, strict, rounds))
+        i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, consistent, parallel=false, strict, rounds, final_no_resolve, pre_resolve))
         loc = sample(1:no_trees, 2, replace = false)
         names = [t.label for t in true_trees[rand_order][loc]]
 
@@ -149,12 +161,12 @@ function run_one_sim(no_lineages::Int, rec_rate::Float64, type, strict, simtype,
     return a_index_i_vector
 end
 
-function run_MCC_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; type="VI", strict=true, simtype=:flu, res=0.3, k_range=2:8, rounds=2)
+function run_MCC_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; type="VI", strict=true, simtype=:flu, res=0.3, k_range=2:8, rounds=2, consistent=false, final_no_resolve=false, pre_resolve=false)
     average_accuracy_i = Dict()
     accuracy_index_i = Dict{Int, Vector{Float32}}()
     sim_results = Dict()
     for i in 1:no_sim
-        sim_results[i] = Dagger.@spawn run_one_sim(no_lineages, rec_rate, type, strict, simtype, res, k_range, rounds)
+        sim_results[i] = Dagger.@spawn run_one_sim(no_lineages, rec_rate, type, strict, simtype, res, k_range, rounds, consistent, final_no_resolve, pre_resolve)
     end
     for no_trees in k_range
         accuracy_index_i[no_trees] = Float32[]
@@ -197,6 +209,9 @@ function main()
     res = parsed_args["res"]
     rounds = parsed_args["rounds"]
     krange_ = parsed_args["krange"]
+    final_no_resolve = parsed_args["final-no-resolve"]
+    pre_resolve = parsed_args["pre-resolve"]
+    consistent = parsed_args["consistent"]
     if simt=="flu"
         simtype = :flu
     else
@@ -208,13 +223,11 @@ function main()
         k_range = [2,4,8]
     end
     println("Simulating ARGs and sequences of sample size $n and recombination rate $r simtype $simt")
-    if metric=="VI"
-        vi_accuracy_i = run_MCC_accuracy_simulations(num_sim, n, r; type=metric, strict, simtype, res, k_range, rounds)
-        write_output(o, vi_accuracy_i, metric, r; k_range)
-    else
-        rf_accuracy_i =  run_MCC_accuracy_simulations(num_sim, n, r; type=metric, strict, simtype, res, k_range, rounds)
-        write_output(o, rf_accuracy_i, metric, r; k_range)
-    end
+
+    vi_accuracy_i = run_MCC_accuracy_simulations(num_sim, n, r; type=metric, strict, simtype, res, k_range, rounds, consistent, final_no_resolve, pre_resolve)
+    write_output(o, vi_accuracy_i, metric, r; k_range)
+
+
 end
 
 main()

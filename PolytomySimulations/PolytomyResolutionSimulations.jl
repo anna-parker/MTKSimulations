@@ -37,7 +37,7 @@ function parse_commandline()
         "--rec"
             help = "recombination rate ratio to coalescence (Float)"
             arg_type = Float64
-            default = 0.0
+            default = -4.0
         "--o"
             help = "output directory"
             arg_type = String
@@ -70,6 +70,18 @@ function parse_commandline()
             help = "if full 2:8 (true) or [2,4,8] (false)"
             arg_type = Bool
             default = true
+        "--final-no-resolve"
+            help = "default false"
+            arg_type = Bool
+            default = false
+        "--pre-resolve"
+            help = "default false"
+            arg_type = Bool
+            default = false
+        "--consistent"
+            help = "default false"
+            arg_type = Bool
+            default = false
     end
 
     return parse_args(s)
@@ -114,7 +126,7 @@ function new_tree_RF_dist(true_trees, test_trees)
     return rf
 end
 
-function run_tree_poly_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; simtype = :flu, res=0.3, strict=true, k_range=2:8, rounds)
+function run_tree_poly_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; simtype = :flu, res=0.3, strict=true, k_range=2:8, rounds=2, consistent=false, final_no_resolve=false, pre_resolve=false)
     r = 10^rec_rate
     percent_correct_new_splits_vector = Dict()
     percent_incorrect_new_splits_vector = Dict()
@@ -131,7 +143,7 @@ function run_tree_poly_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_r
             unresolved_trees = MTKTools.remove_branches(unresolved_trees; c)
 
             i_trees = [copy(t) for t in unresolved_trees]
-            i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, consistent = false, parallel=true, strict, rounds))
+            i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, consistent, parallel=true, strict, rounds, final_no_resolve, pre_resolve))
             
             loc = rand(1:no_trees)
             correct_new_splits_i, incorrect_new_splits_i = new_split_accuracy([true_trees[rand_order][loc]], [unresolved_trees[loc]], [i_trees[loc]])
@@ -164,7 +176,7 @@ function run_tree_poly_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_r
     return  percent_correct_new_splits_vector, percent_incorrect_new_splits_vector
 end
 
-function run_tree_rf_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; simtype = :flu, res=0.3, strict=true, k_range=2:8, rounds=2)
+function run_tree_rf_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; simtype = :flu, res=0.3, strict=true, k_range=2:8, rounds=2, consistent=false, final_no_resolve=false, pre_resolve=false)
     r = 10^rec_rate
     rf_change_info = Dict()
     rf_change_vector = Dict()
@@ -178,7 +190,7 @@ function run_tree_rf_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rat
             unresolved_trees = MTKTools.remove_branches(unresolved_trees; c)
 
             i_trees = [copy(t) for t in unresolved_trees]
-            i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;consistent = false, parallel=true, strict, rounds))
+            i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;consistent, parallel=true, strict, rounds, final_no_resolve, pre_resolve))
             
             loc = rand(1:no_trees)
             old_rf = new_tree_RF_dist([true_trees[rand_order][loc]], [unresolved_trees[loc]])
@@ -220,6 +232,9 @@ function main()
     strict = parsed_args["strict"]
     rounds = parsed_args["rounds"]
     k_range_ = parsed_args["krange"]
+    final_no_resolve = parsed_args["final-no-resolve"]
+    pre_resolve = parsed_args["pre-resolve"]
+    consistent = parsed_args["consistent"]
     if simt=="flu"
         simtype = :flu
     else
@@ -237,13 +252,13 @@ function main()
     # metric = "splits"
     println("Simulating ARGs and sequences of sample size $n and recombination rate $r and k_range in $k_range")
     if metric=="rf"
-        rf_info = run_tree_rf_accuracy_simulations(num_sim, n, r; simtype, res, strict, rounds, k_range)
+        rf_info = run_tree_rf_accuracy_simulations(num_sim, n, r; simtype, res, strict, rounds, k_range, consistent, final_no_resolve, pre_resolve)
         if !isdir(o)
             mkdir(o)
         end
         write_output_to_file(o*"/results_rf_"*string(r)*".txt", rf_info; k_range)
     else
-        percent_correct_new_splits_vector, percent_incorrect_new_splits_vector = run_tree_poly_accuracy_simulations(num_sim, n, r; simtype, res, strict, rounds, k_range)
+        percent_correct_new_splits_vector, percent_incorrect_new_splits_vector = run_tree_poly_accuracy_simulations(num_sim, n, r; simtype, res, strict, rounds, k_range, consistent, final_no_resolve, pre_resolve)
         write_output(o, percent_correct_new_splits_vector, percent_incorrect_new_splits_vector, r; k_range)
     end
 end

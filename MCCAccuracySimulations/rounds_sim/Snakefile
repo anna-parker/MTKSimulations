@@ -28,7 +28,7 @@ rule run_simulations:
     input:
         "mcc_accuracy_simulations.so"
     output:
-        "results/results_{simtype}_{res}_{strict}_{rounds}/results_standard_{m}_{rec}.txt",
+        "results/results_{simtype}_{res}_{strict}_{rounds}/results_{m}_{rec}.txt",
     params: 
         n_leaves = config.get("n"),
         rounds  = config.get("sim"),
@@ -46,7 +46,7 @@ rule run_simulations:
 
 rule plot_graphs:
     input:
-        expand(["results/results_{simtype}_{res}_{strict}_{rounds}/results_standard_{m}_{rec}.txt"], rec=REC, m=METRIC, strict=STRICT, simtype=SIMTYPE, res=RES, rounds=ROUNDS)
+        expand(["results/results_{simtype}_{res}_{strict}_{rounds}/results_{m}_{rec}.txt"], rec=REC, m=METRIC, strict=STRICT, simtype=SIMTYPE, res=RES, rounds=ROUNDS)
     output:
         "Plots.zip"
     shell:
@@ -58,7 +58,7 @@ rule plot_graphs:
 
 rule zip:
     input:
-        expand(["results/results_{simtype}_{res}_{strict}_{rounds}/results_standard_{m}_{rec}.txt"], rec=REC, m=METRIC, strict=STRICT, simtype=SIMTYPE, res=RES, rounds=ROUNDS),
+        expand(["results/results_{simtype}_{res}_{strict}_{rounds}/results_{m}_{rec}.txt"], rec=REC, m=METRIC, strict=STRICT, simtype=SIMTYPE, res=RES, rounds=ROUNDS),
         "Plots.zip"
     output:
         "results.zip"
