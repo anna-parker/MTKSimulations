@@ -56,3 +56,23 @@ $$
 Now the V-measure of $M_R$ and $M_I$ is defined as $$V_{\beta}(M_R, M_I) = (1 + \beta) \frac{h \cdot c}{\beta h + c}$$ where $0 \leq \beta \leq \infty$. Inorder to compute $h$ and $c$ I use the relationship 
 $$V_{0}(M_R, M_I) = h$$
 $$V_{0}(M_I, M_R) = c$$
+
+## Selected Results 
+
+We do not see much improvement with increasing $K$ in the VI or rand index, especially when we use liberal resolve. When strict resolve is used an improvement starts to be seen for higher recombination rates and lower levels of resolution. But still, this is not very prominent. 
+
+We notice a difference between the Kingman and the flu model and the distance distribution - with the greatest distances seen slightly earlier in the Kingman model. This is most likely due to the fact that Kingman has more reassortment events than flu for the same recombination rate (see `AccuracySharedBranches`). 
+
+The difference between the rand index and the VI distance is also visible - at higher recombination rates the rand distance decreases faster than the VI distance.
+
+We do not see a prominent difference between when the consistent parameter is used or not. 
+
+The v-measure of homogenity and completeness gives us a better overview of how TreeKnit calculates MCCs. Completeness decreases with increasing $K$ - i.e. MCCs are split up too much, however this is more prominent when liberal resolve is used than when strict resolve is used. Homogenity however increases with $K$ (at a slightly lower rate than completeness decreases). This is again slightly more prominent with liberal resolve than with strict resolve. 
+
+<img src="Figures/v-measure-complete_Accuracy_kingman_0.3_true.png" width="49%"/> <img src="Figures/v-measure-complete_Accuracy_kingman_0.3_false.png" width="49%"/> 
+
+<em>Left: ARGs simulated under kingman coalescence model and resolution rate 0.3 and strict resolve, Right: ARGs simulated under kingman coalescence model and resolution rate 0.3 and liberal resolve</em>
+
+<img src="Figures/v-measure-homogenity_Accuracy_kingman_0.3_true.png" width="49%"/> <img src="Figures/v-measure-homogenity_Accuracy_kingman_0.3_false.png" width="49%"/> 
+
+<em>Left: ARGs simulated under kingman coalescence model and resolution rate 0.3 and strict resolve, Right: ARGs simulated under kingman coalescence model and resolution rate 0.3 and liberal resolve</em>
