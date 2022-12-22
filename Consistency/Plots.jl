@@ -50,9 +50,9 @@ for consistent in params["CONSISTENT"]
                                         append!(tc_ur_mean_[(r,k, pr_val, fr_val)], tc_ur_file[(tc_ur_file.k .== k), :].mean)
                                     end
                                     if !haskey(const_mean_, (r,k, pr_val, fr_val))
-                                        const_mean_[(r,k, pr_val, fr_val)] = const_file[(tc_ur_file.k .== k), :].mean
+                                        const_mean_[(r,k, pr_val, fr_val)] = const_file[(const_file.k .== k), :].mean
                                     else
-                                        append!(const_mean_[(r,k, pr_val, fr_val)], const_file[(tc_ur_file.k .== k), :].mean)
+                                        append!(const_mean_[(r,k, pr_val, fr_val)], const_file[(const_file.k .== k), :].mean)
                                     end
                                 end
                             end
@@ -75,15 +75,15 @@ for consistent in params["CONSISTENT"]
                         end
                         savefig(p, "Plots/Topo_Compat_k"*string(k)*"_"*sim*"_"*res*"_"*strict*"_"*consistent*".png")
                     end
-                    p = plot(recomb_rate, tc_mean_[(params["ROUNDS"][1], k, 0, 0)], label="r="*string(params["ROUNDS"][1])*", %incons. splits.", ylabel="%inconsistent splits", xlabel="recombination rate", linecolor=l_color[1], title="%MCC Inconsistencies for Average Tree in "*string(k)*"-Tree ARG", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :outertopleft, legendfontsize=6)    
+                    p = plot(recomb_rate, const_mean_[(params["ROUNDS"][1], k, 0, 0)], label="r="*string(params["ROUNDS"][1])*", %incons. splits.", ylabel="%inconsistent splits", xlabel="recombination rate", linecolor=l_color[1], title="%MCC Inconsistencies for Average Tree in "*string(k)*"-Tree ARG", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :outertopleft, legendfontsize=6)    
                     for r in params["ROUNDS"]
                         pos = parse(Int,r) + 4*(parse(Int,r)-1)
                         if r != params["ROUNDS"][1]
-                            plot!(recomb_rate, tc_mean_[(r, k, 0, 0)], label="r="*string(r)*", %incons. splits", ylabel="", xlabel="recombination rate", linecolor=l_color[pos])
+                            plot!(recomb_rate, const_mean_[(r, k, 0, 0)], label="r="*string(r)*", %incons. splits", ylabel="", xlabel="recombination rate", linecolor=l_color[pos])
                         end
                         for (i, (vals, name)) in enumerate(zip([(1,0), (0,1), (1,1)], ["pre-r", "final-no-r", "pre-r, final-no-r"]))
                             pos = parse(Int,r) +i+ 4*(parse(Int,r) -1)
-                            plot!(recomb_rate, tc_mean_[(r, k, vals...)], label="r="*string(r)*", %incons. splits, "*name, ylabel="", xlabel="recombination rate", linecolor=l_color[pos])
+                            plot!(recomb_rate, const_mean_[(r, k, vals...)], label="r="*string(r)*", %incons. splits, "*name, ylabel="", xlabel="recombination rate", linecolor=l_color[pos])
                         end
                         savefig(p, "Plots/Consistency_k"*string(k)*"_"*sim*"_"*res*"_"*strict*"_"*consistent*".png")
                     end

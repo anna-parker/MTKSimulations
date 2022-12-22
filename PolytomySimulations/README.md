@@ -67,6 +67,10 @@ Again we note that the `consistent` parameter has little to no impact on our res
 
 <em>Left: ARGs simulated under flu coalescence model and resolution rate 0.3 and liberal resolve, Right: ARGs simulated under flu coalescence model and resolution rate 0.3, liberal resolve and the consistent parameter</em>
 
-When we look at the impact of the number of `rounds` used in TreeKnit we see that increasing the number of rounds actually has little impact on the number of correct splits - and the increase in correct splits is similar to the increase in incorrect splits - leading us to believe that increasing the number of rounds used is unlikely to be beneficial. 
+When we look at the impact of the number of `rounds` used in TreeKnit we see that increasing the number of rounds actually has little impact on the number of correct splits - and the increase in correct splits is similar to the increase in incorrect splits - leading us to believe that increasing the number of rounds used is unlikely to be beneficial. This is also seen quite well with the RF distance that appears to be quite unaffected by the number of rounds. 
+
+<img src="Figures/rounds_PercentageCorrectResolution_kingman_0.3_true.png" width="49%"/> <img src="Figures/rounds_PercentageRF_improvement_kingman_0.3_true.png" width="49%"/> 
+
+<em>Left and Right: ARGs simulated under Kingman coalescence model, resolution rate 0.3 and strict resolve </em>
 
 We also investigated the impact of the `pre-resolve` parameter as well as the `final-no-resolve` parameter.
