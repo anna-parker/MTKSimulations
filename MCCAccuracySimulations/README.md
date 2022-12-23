@@ -103,4 +103,4 @@ We note that performing multiple rounds of inference again does not have much of
 
 <em>Left: ARGs simulated under kingman coalescence model and resolution rate 0.2 and strict resolve, Right: ARGs simulated under kingman coalescence model and resolution rate 0.2 and liberal resolve</em>
 
-We also investigated the impact of the `pre-resolve` parameter as well as the `final-no-resolve` parameter and find this to be a more optimal parameter configuration - see the `Consistency` section.  
+We also investigated the impact of the `pre-resolve` parameter as well as the `final-no-resolve` parameter and find this to be a more optimal parameter configuration - see the [Consistency](../Consistency/) section.  

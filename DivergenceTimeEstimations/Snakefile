@@ -31,13 +31,14 @@ rule run_simulations:
     input:
         "arg_simulations.so"
     output:
-        expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{{n}}/{k}.nwk"], k=range(2, SEGMENTS)),
-        expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{{n}}/true_segment_{k}.nwk"], k=range(2, SEGMENTS)),
-        expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{{n}}/{k}.fasta"], k=range(2, SEGMENTS)),
-        expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{{n}}/{k}/MCCs.json"], k=range(2, SEGMENTS))
+        expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{{n}}/{k}.nwk"], k=range(2, SEGMENTS+1)),
+        expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{{n}}/true_segment_{k}.nwk"], k=range(2, SEGMENTS+1)),
+        expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{{n}}/{k}.fasta"], k=range(2, SEGMENTS+1)),
+        expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{{n}}/{k}/MCCs.json"], k=range(2, SEGMENTS+1))
     params:
         rec=lambda wcs: dict_REC[wcs.key],
         n_leaves = config.get("n"),
+        segments = SEGMENTS,
     wildcard_constraints:
         key = "[0-9]+",
         n = "([0-9]+)",
@@ -46,20 +47,20 @@ rule run_simulations:
         res = "(0.3|0.35|0.4)",
     shell:
         """
-        julia -J arg_simulations.so --project=../. ARGSimulations.jl --rec {params.rec} --o sim_{wildcards.simtype}_{wildcards.res}_{wildcards.strict}/sim_{wildcards.key}_{wildcards.n} --n {params.n_leaves} --simtype {wildcards.simtype} --res {wildcards.res} --strict {wildcards.strict}
+        julia -J arg_simulations.so --project=../. ARGSimulations.jl --rec {params.rec} --o sim_{wildcards.simtype}_{wildcards.res}_{wildcards.strict}/sim_{wildcards.key}_{wildcards.n} --n {params.n_leaves} --simtype {wildcards.simtype} --res {wildcards.res} --strict {wildcards.strict} --segments {params.segments}
         """
 
 rule test_treetime_inference:
     message:
         "start treetime inference"
     input: 
-       expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{n}/{k}.nwk"], k=range(2, SEGMENTS), n=range(ROUNDS)),
-       expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{n}/true_segment_{k}.nwk"], k=range(2, SEGMENTS), n=range(ROUNDS)),
-       expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{n}/{k}.fasta"], k=range(2, SEGMENTS), n=range(ROUNDS)),
-       expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{n}/{k}/MCCs.json"], k=range(2, SEGMENTS), n=range(ROUNDS))
+       expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{n}/{k}.nwk"], k=range(2, SEGMENTS+1), n=range(ROUNDS)),
+       expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{n}/true_segment_{k}.nwk"], k=range(2, SEGMENTS+1), n=range(ROUNDS)),
+       expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{n}/{k}.fasta"], k=range(2, SEGMENTS+1), n=range(ROUNDS)),
+       expand(["sim_{{simtype}}_{{res}}_{{strict}}/sim_{{key}}_{n}/{k}/MCCs.json"], k=range(2, SEGMENTS+1), n=range(ROUNDS))
 
     output: 
-        expand(["results/results_{{simtype}}_{{res}}_{{strict}}/tt_summary_{{key}}_{k}.csv"], k=range(2, SEGMENTS))
+        expand(["results/results_{{simtype}}_{{res}}_{{strict}}/tt_summary_{{key}}_{k}.csv"], k=range(2, SEGMENTS+1))
     params:
         rec=lambda wcs: dict_REC[wcs.key],
         rounds = ROUNDS
@@ -73,13 +74,12 @@ rule test_treetime_inference:
     shell:
         """
         python treetime_arg_test.py -i sim_{wildcards.simtype}_{wildcards.res}_{wildcards.strict} -o results/results_{wildcards.simtype}_{wildcards.res}_{wildcards.strict} -k {wildcards.key} -n {params.rounds}
-        rm -r sim_{wildcards.simtype}_{wildcards.res}_{wildcards.strict}/sim_{wildcards.key}_*
         """
 
 
 rule plot_graphs:
     input:
-        expand(["results/results_{simtype}_{res}_{strict}/tt_summary_{key}_{k}.csv"], k=range(2, SEGMENTS), key=dict_REC.keys(), simtype=SIMTYPE, res=RES, strict=STRICT)
+        expand(["results/results_{simtype}_{res}_{strict}/tt_summary_{key}_{k}.csv"], k=range(2, SEGMENTS+1), key=dict_REC.keys(), simtype=SIMTYPE, res=RES, strict=STRICT)
     output:
         "Plots.zip"
     shell:
@@ -91,7 +91,7 @@ rule plot_graphs:
 
 rule zip:
     input:
-        expand(["results/results_{simtype}_{res}_{strict}/tt_summary_{key}_{k}.csv"], k=range(2, SEGMENTS), key=dict_REC.keys(), simtype=SIMTYPE, res=RES, strict=STRICT),
+        expand(["results/results_{simtype}_{res}_{strict}/tt_summary_{key}_{k}.csv"], k=range(2, SEGMENTS+1), key=dict_REC.keys(), simtype=SIMTYPE, res=RES, strict=STRICT),
         "Plots.zip"
     output:
         "results.zip"

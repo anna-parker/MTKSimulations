@@ -39,7 +39,7 @@ The amount of polytomies that can be resolved is related to the resolution rate 
 
 <em>Left: ARGs simulated under flu coalescence model and resolution rate 0.3 and strict resolve, Right: ARGs simulated under flu coalescence model and resolution rate 0.4 and strict resolve</em>
 
-The Kingman and flu simulation model lead to slightly different plot structures. The percentage of correctly determined branches decreases faster in Kingman than in flu - this is most likely due to the fact that the average number of reassortments is slightly higher in the Kingman model - leading to on average less shared branches between trees (if a branch is not shared with another tree, even if that tree is known no information from that other tree can be used to reconstruct it). For more information see the `AccuracySharedBranches` section. 
+The Kingman and flu simulation model lead to slightly different plot structures. The percentage of correctly determined branches decreases faster in Kingman than in flu - this is most likely due to the fact that the average number of reassortments is slightly higher in the Kingman model - leading to on average less shared branches between trees (if a branch is not shared with another tree, even if that tree is known no information from that other tree can be used to reconstruct it). For more information see the [AccuracySharedBranches](../AccuracySharedBranches/) section. 
 
 <img src="Figures/PercentageCorrectResolution_flu_0.3_true.png" width="49%"/> <img src="Figures/PercentageCorrectResolution_kingman_0.3_true.png" width="49%"/> 
 
@@ -73,4 +73,4 @@ When we look at the impact of the number of `rounds` used in TreeKnit we see tha
 
 <em>Left and Right: ARGs simulated under Kingman coalescence model, resolution rate 0.3 and strict resolve </em>
 
-We also investigated the impact of the `pre-resolve` parameter as well as the `final-no-resolve` parameter and find this to be a more optimal parameter configuration - see the `Consistency` section.  
+We also investigated the impact of the `pre-resolve` parameter as well as the `final-no-resolve` parameter and find this to be a more optimal parameter configuration - see the [Consistency](../Consistency/) section.  

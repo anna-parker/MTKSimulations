@@ -55,23 +55,22 @@ As I performed most simulations on a cluster I have included a bash script for l
  - Plot results of simulations
  - remove unnecessary files, zip output files 
 
-### 1. Accuracy of MCCs
+### 1. [Accuracy of MCCs](MCCAccuracySimulations/)
 
 Assessment of MCC accuracy with VI and rand index. 
 
-### 2. Accuracy of Resolved Polytomies
+### 2. [Accuracy of Resolved Polytomies](PolytomySimulations/)
 
 Using RF - distance improvement of tree and percentage of missing splits that are corrected or incorrectly added back to the tree.
 
-### 3. Accuracy of Shared Branches
+### 3. [Accuracy of Shared Branches](AccuracySharedBranches/)
 
 Using percentage of branches that are correctly and incorrectly inferred to be shared amongst tree pairs.
 
-### 4. Accuracy of Divergence Time Estimations
+### 4. [Accuracy of Divergence Time Estimations](DivergenceTimeEstimations/)
 
 Improvement of divergence time inference with [TreeTime](https://github.com/neherlab/treetime) when TreeKnit is used to infer shared branches and this information is used in ancestral sequence reconstruction and branch length/ divergence time inference. 
 
-### 5. Consistency of MCCs
+### 5. [Consistency of MCCs](Consistency/)
 
 Make sure that the Maximally Compatible Clades found by TreeKnit fulfill all necessary conditions, e.g. they are topologically compatible and are consistent.
-

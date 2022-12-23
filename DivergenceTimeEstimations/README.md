@@ -35,7 +35,7 @@ We see the expected improvement in the standard error of divergence times estima
 
 <em>Left: ARGs simulated under flu coalescence model, resolution rate 0.35 and strict resolve, Right: ARGs ARGs simulated under kingman coalescence model, resolution rate 0.35 and strict resolve,</em>
 
-As to be expected this improvement starts decreasing faster with trees simulated under the Kingman model - most likely due to the fact that Kingman trees have more reassortments and thus less shared branches than Flu trees even with the same reassortment rate (see explanation in the `AccuracySharedBranches` section).
+As to be expected this improvement starts decreasing faster with trees simulated under the Kingman model - most likely due to the fact that Kingman trees have more reassortments and thus less shared branches than Flu trees even with the same reassortment rate (see explanation in the [AccuracySharedBranches](../AccuracySharedBranches/) section).
 
 We note that although no branches are removed in this simulation for better comparison of the final trees - mutations occur at a rate that is proportional to the resolution rate - i.e the number of branches with no mutations would result in trees with a 0.35 resolution rate if internal branches with no mutations were to be removed. This can be seen when we look at the median and mean difference in inferred branch length. For $K=1$ the median difference is 1 - this makes sense as at resolution rate 0.35 the major of branches will not have mutations and will have inferred branch length 0. The decrease in difference with increasing $K$ shows the impact of using sequence information from other trees - made possible with the ARG module in TreeTime. 
 
