@@ -63,13 +63,13 @@ for consistent in params["CONSISTENT"]
                 for k in [4,8]
                     p = plot(recomb_rate, tc_mean_[(params["ROUNDS"][1], k, 0, 0)], label="r="*string(params["ROUNDS"][1])*", %incomp.", ylabel="% leaves in topo. incomp. MCC", xlabel="recombination rate", linecolor=l_color[1], title="% Topological Incompatibilities for Average Tree in "*string(k)*"-Tree ARG", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :outertopleft, legendfontsize=6)    
                     for r in params["ROUNDS"]
-                        pos = parse(Int,r) + 4*(parse(Int,r)-1)
+                        pos = 1 + 4*(parse(Int,r)-1)
                         if r != params["ROUNDS"][1]
                             plot!(recomb_rate, tc_mean_[(r, k, 0, 0)], label="r="*string(r)*", %incomp.", ylabel="", xlabel="recombination rate", linecolor=l_color[pos])
                         end
                         plot!(recomb_rate, tc_ur_mean_[(r, k, 0, 0)], label="r="*string(r)*", %unres. incomp.", ylabel="", xlabel="recombination rate", linecolor=l_color[pos],linestyle=:dash)
                         for (i, (vals, name)) in enumerate(zip([(1,0), (0,1), (1,1)], ["pre-r", "final-no-r", "pre-r, final-no-r"]))
-                            pos = parse(Int,r) +i+ 4*(parse(Int,r) -1)
+                            pos = 1 +i+ 4*(parse(Int,r) -1)
                             plot!(recomb_rate, tc_mean_[(r, k, vals...)], label="r="*string(r)*", %incomp., "*name, ylabel="", xlabel="recombination rate", linecolor=l_color[pos])
                             plot!(recomb_rate, tc_ur_mean_[(r, k, vals...)], label="r="*string(r)*", %unres. incomp. "*name, ylabel="", xlabel="recombination rate", linecolor=l_color[pos],linestyle=:dash)
                         end
@@ -77,12 +77,12 @@ for consistent in params["CONSISTENT"]
                     end
                     p = plot(recomb_rate, const_mean_[(params["ROUNDS"][1], k, 0, 0)], label="r="*string(params["ROUNDS"][1])*", %incons. splits.", ylabel="%inconsistent splits", xlabel="recombination rate", linecolor=l_color[1], title="%MCC Inconsistencies for Average Tree in "*string(k)*"-Tree ARG", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :outertopleft, legendfontsize=6)    
                     for r in params["ROUNDS"]
-                        pos = parse(Int,r) + 4*(parse(Int,r)-1)
+                        pos = 1 + 4*(parse(Int,r)-1)
                         if r != params["ROUNDS"][1]
                             plot!(recomb_rate, const_mean_[(r, k, 0, 0)], label="r="*string(r)*", %incons. splits", ylabel="", xlabel="recombination rate", linecolor=l_color[pos])
                         end
                         for (i, (vals, name)) in enumerate(zip([(1,0), (0,1), (1,1)], ["pre-r", "final-no-r", "pre-r, final-no-r"]))
-                            pos = parse(Int,r) +i+ 4*(parse(Int,r) -1)
+                            pos = 1 +i+ 4*(parse(Int,r) -1)
                             plot!(recomb_rate, const_mean_[(r, k, vals...)], label="r="*string(r)*", %incons. splits, "*name, ylabel="", xlabel="recombination rate", linecolor=l_color[pos])
                         end
                         savefig(p, "Plots/Consistency_k"*string(k)*"_"*sim*"_"*res*"_"*strict*"_"*consistent*".png")

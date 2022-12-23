@@ -61,11 +61,31 @@ $$V_{0}(M_I, M_R) = c$$
 
 We do not see much improvement with increasing $K$ in the VI or rand index, especially when we use liberal resolve. When strict resolve is used an improvement starts to be seen for higher recombination rates and lower levels of resolution. But still, this is not very prominent. 
 
+<img src="Figures/VI_Accuracy_kingman_0.2_false.png" width="32%"/> <img src="Figures/VI_Accuracy_kingman_0.3_false.png" width="32%"/> <img src="Figures/VI_Accuracy_kingman_0.4_false.png" width="32%"/> 
+
+<em>ARGs simulated under kingman coalescence model and liberal resolve, Left: resolution rate 0.2, Middle: resolution rate 0.3, Right: resolution rate 0.4</em>
+
+<img src="Figures/VI_Accuracy_kingman_0.2_true.png" width="32%"/> <img src="Figures/VI_Accuracy_kingman_0.3_true.png" width="32%"/> <img src="Figures/VI_Accuracy_kingman_0.4_true.png" width="32%"/> 
+
+<em>ARGs simulated under kingman coalescence model and strict resolve, Left: resolution rate 0.2, Middle: resolution rate 0.3, Right: resolution rate 0.4</em>
+
 We notice a difference between the Kingman and the flu model and the distance distribution - with the greatest distances seen slightly earlier in the Kingman model. This is most likely due to the fact that Kingman has more reassortment events than flu for the same recombination rate (see `AccuracySharedBranches`). 
+
+<img src="Figures/VI_Accuracy_flu_0.3_true.png" width="49%"/> <img src="Figures/VI_Accuracy_flu_0.3_false.png" width="49%"/> 
+
+<em>ARGs simulated under flu coalescence model - for Kingman see above and resolution rate 0.3 Left: strict resolve, Right: liberal resolve</em>
 
 The difference between the rand index and the VI distance is also visible - at higher recombination rates the rand distance decreases faster than the VI distance.
 
+<img src="Figures/rand_Accuracy_kingman_0.3_true.png" width="49%"/> <img src="Figures/VI_Accuracy_kingman_0.3_true.png" width="49%"/> 
+
+<em>ARGs simulated under kingman coalescence model, resolution rate 0.3 and strict resolve</em>
+
 We do not see a prominent difference between when the consistent parameter is used or not. 
+
+<img src="Figures/VI_Accuracy_kingman_0.3_true_consistent.png" width="49%"/> <img src="Figures/VI_Accuracy_kingman_0.3_true.png" width="49%"/> 
+
+<em>ARGs simulated under kingman coalescence model, resolution rate 0.3 and strict resolve, Left: using consistent constraint, Right: default values</em>
 
 The v-measure of homogenity and completeness gives us a better overview of how TreeKnit calculates MCCs. Completeness decreases with increasing $K$ - i.e. MCCs are split up too much, however this is more prominent when liberal resolve is used than when strict resolve is used. Homogenity however increases with $K$ (at a slightly lower rate than completeness decreases). This is again slightly more prominent with liberal resolve than with strict resolve. 
 
