@@ -96,3 +96,11 @@ The v-measure of homogenity and completeness gives us a better overview of how T
 <img src="Figures/v-measure-homogenity_Accuracy_kingman_0.3_true.png" width="49%"/> <img src="Figures/v-measure-homogenity_Accuracy_kingman_0.3_false.png" width="49%"/> 
 
 <em>Left: ARGs simulated under kingman coalescence model and resolution rate 0.3 and strict resolve, Right: ARGs simulated under kingman coalescence model and resolution rate 0.3 and liberal resolve</em>
+
+We note that performing multiple rounds of inference again does not have much of an impact on the final results.
+
+<img src="Figures/rounds_VI_Accuracy_kingman_0.2_true.png" width="49%"/> <img src="Figures/rounds_VI_Accuracy_kingman_0.2_false.png" width="49%"/> 
+
+<em>Left: ARGs simulated under kingman coalescence model and resolution rate 0.2 and strict resolve, Right: ARGs simulated under kingman coalescence model and resolution rate 0.2 and liberal resolve</em>
+
+We also investigated the impact of the `pre-resolve` parameter as well as the `final-no-resolve` parameter and find this to be a more optimal parameter configuration - see the `Consistency` section.  

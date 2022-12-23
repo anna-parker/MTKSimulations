@@ -74,15 +74,15 @@ Let us look now at a 3 tree subset of these $k$ trees. At each recombination eve
 
 ### Transitive consistency relationship on all triplets of trees
 
-This is necessary for the construction of an ARG from MCCs and trees. For the mcc pairs: $\text{MCC}_{1,2}$, $\text{MCC}_{1,3}$ and $\text{MCC}_{2,3}$, where $\text{MCC}_{1,2}$ is the set of MCCs between the trees  $\text{tree}_1$ and  $\text{tree}_2$ we have the relationship:
+This is necessary for the construction of an ARG from MCCs and trees. For the mcc pairs: $MCC_{1,2}$, $MCC_{1,3}$ and $MCC_{2,3}$, where $MCC_{1,2}$ is the set of MCCs between the trees  $tree_1$ and  $tree_2$ we have the relationship:
 
 $$\forall m_{1,2} \in \text{MCC}_{1,2}, \forall m_{1,3} \in \text{MCC}_{1,3}: \text{   if  } m_{1,2} \cap m_{1,3} \neq \emptyset \text{   then  } \exists m_{2,3} \in \text{MCC}_{2,3} \text{   with  } m_{1,2} \cap m_{1,3} \subseteq m_{2,3}$$
 
 Furthermore, we can distinguish between two cases:
 
-1. $m_{1,2} \cap m_{1,3} = m_{1,2} = m_{1,3}$ In this case a recombination event has occurred between $\text{tree}_1$ and $\text{tree}_2$ as well as between $\text{tree}_1$ and $\text{tree}_3$ above the least common ancestor of the nodes in $m_{1,2} \cap m_{1,3}$. As we assume there are at most two ancestors for each recombination event $\text{tree}_2$ and $\text{tree}_3$ should not have a recombination event between them unless there was another recombination event immediately proceeding this event; therefore both $m_{1,2} \cap m_{1,3} = m_{2,3}$ and $m_{1,2} \cap m_{1,3} \subset m_{2,3}$ are possible.
+1. $m_{1,2} \cap m_{1,3} = m_{1,2} = m_{1,3}$ In this case a recombination event has occurred between $tree_1$ and $tree_2$ as well as between $tree_1$ and $tree_3$ above the least common ancestor of the nodes in $m_{1,2} \cap m_{1,3}$. As we assume there are at most two ancestors for each recombination event $tree_2$ and $tree_3$ should not have a recombination event between them unless there was another recombination event immediately proceeding this event; therefore both $m_{1,2} \cap m_{1,3} = m_{2,3}$ and $m_{1,2} \cap m_{1,3} \subset m_{2,3}$ are possible.
 
-2.  $m_{1,2} \cap m_{1,3} \subset m_{1,2}$ or $m_{1,2} \cap m_{1,3} \subset m_{1,3}$ In the first of these cases a recombination event has occurred between $\text{tree}_1$ and $\text{tree}_3$ but not between $\text{tree}_1$ and $\text{tree}_2$. This means that at that recombination event $\text{tree}_1$ and $\text{tree}_2$ must have the same ancestor while $\text{tree}_3$ has a different ancestor leading to the condition that $\text{tree}_2$ and $\text{tree}_3$ must have a recombination event at this same location, or in set notation: $m_{1,2} \cap m_{1,3} = m_{2,3}$. 
+2.  $m_{1,2} \cap m_{1,3} \subset m_{1,2}$ or $m_{1,2} \cap m_{1,3} \subset m_{1,3}$ In the first of these cases a recombination event has occurred between $tree_1$ and $tree_3$ but not between $tree_1$ and $tree_2$. This means that at that recombination event $tree_1$ and $tree_2$ must have the same ancestor while $tree_3$ has a different ancestor leading to the condition that $tree_2$ and $tree_3$ must have a recombination event at this same location, or in set notation: $m_{1,2} \cap m_{1,3} = m_{2,3}$. 
 
 Furthermore, we can distinguish between two cases:
 
@@ -93,15 +93,15 @@ $\Rightarrow $ both $m_{1,2} \cap m_{1,3} = m_{2,3}$ and $m_{1,2} \cap m_{1,3} \
 
 
 This can be visualized with the following examples:
-1.  $$\text{MCC}_{1,2} = [[A, B, C]]$$
-    $$\text{MCC}_{1,3} = [[A, B, C]]$$
-    $$\Rightarrow \text{MCC}_{2,3} = [[A, B, C]]$$
-2.A. $$\text{MCC}_{1,2} = [[A, B], [C]]$$
-    $$\text{MCC}_{1,3}  = [[A, B], [C]]$$
-    $$\Rightarrow \text{MCC}_{2,3}  = [[A, B], [C]] \text{ or } [[A, B, C]]$$
-2.B. $$\text{MCC}_{1,2}  = [[A, B, C]]$$
-    $$\text{MCC}_{1,3}  = [[A, B], [C]]$$
-    $$\Rightarrow \text{MCC}_{2,3}  = [[A, B], [C]$$
+1.  $$MCC_{1,2} = [[A, B, C]]$$
+    $$MCC_{1,3} = [[A, B, C]]$$
+    $$\Rightarrow MCC_{2,3} = [[A, B, C]]$$
+2.A. $$MCC_{1,2} = [[A, B], [C]]$$
+    $$MCC_{1,3}  = [[A, B], [C]]$$
+    $$\Rightarrow MCC_{2,3}  = [[A, B], [C]] \text{ or } [[A, B, C]]$$
+2.B. $$MCC_{1,2}  = [[A, B, C]]$$
+    $$MCC_{1,3}  = [[A, B], [C]]$$
+    $$\Rightarrow MCC_{2,3}  = [[A, B], [C]$$
 
 ## Pipeline Steps
 
@@ -113,3 +113,52 @@ This can be visualized with the following examples:
 6. Write a summary of results to a txt file.
 7. Plot results.
 8. Remove unnecessary files and zip output files.
+
+
+## Selected Results
+
+### Topological Incompatibilities
+
+We see that performing 1 round of TreeKnit with strict resolve leads to the highest amount of topological incompatibilities up to resolution, and we see full topological incompatibilities - meaning that TreeKnit returns MCCs which are not in fact MCCs. This can be decreased slightly by adding multiple rounds of inference and pre-resolving trees, however this does not remove all topological incompatibilities. Adding the `final-no-resolve` parameter removes all topological incompatibilities and is thus a good option. As I shall show below `1` round of simulations with the `pre-resolve` and the `final-no-resolve` parameter leads to overall quite good results. 
+
+<img src="Figures/Topo_Compat_k4_flu_0.3_false_false.png" width="49%"/> <img src="Figures/Topo_Compat_k4_flu_0.3_true_false.png" width="49%"/> 
+
+<em>Left: ARGs simulated under flu coalescence model and resolution rate 0.3 and liberal resolve, Right: ARGs simulated under flu coalescence model and resolution rate 0.3 and strict resolve</em>
+
+Results are shown here for $K=4$ trees in order to be able to take a random sample of three trees to test consistency, however results for $K=8$ trees are highly comparable. Adding the `consistent` constraint has little impact on the outcome. 
+
+### Consistency 
+
+Performing one round of simulations with the `final-no-resolve` parameter is the same as performing TreeKnit without resolutions. We see that this leads to the most inconsistent results (why? - this could be explained by TreeKnit performing SA with resolution but then not resolving...) we see that using `pre-resolve` and `final-no-resolve` leads to the best results - when we use liberal resolve 1 round of TreeKnit is optimal, however when strict resolve is used 2 rounds are comparable to 1 round. Again, adding the `consistent` SA constraint has little impact. 
+
+<img src="Figures/Consistency_k4_flu_0.3_false_false.png" width="49%"/> <img src="Figures/Consistency_k4_flu_0.3_true_false.png" width="49%"/> 
+
+<em>Left: ARGs simulated under flu coalescence model and resolution rate 0.3 and liberal resolve, Right: ARGs simulated under flu coalescence model and resolution rate 0.3 and strict resolve</em>
+
+### Comparison to Previous Plots on MCC Accuracy and Resolution Accuracy
+
+As seen in `PolytomySimulations` strict resolve leads to far less incorrect new splits in the inferred trees. From the results below it appears that the optimal parameter configuration would be to perform `1` round of TreeKnit with the `pre-resolve` and the `final-no-resolve` parameter. When `strict` resolve is used the results of doing `1` or `2` rounds of inference with resolution are comparable to the `pre-resolve` and `final-no-resolve` option - however as the later is computationally much more efficient it appears to be the preferable outcome when more trees are known. Again the `consistent` parameter has no great impact and is not shown here. 
+
+<img src="Figures/PercentageCorrectResolution_k4_flu_0.3_false_false.png" width="49%"/> <img src="Figures/PercentageCorrectResolution_k4_flu_0.3_true_false.png" width="49%"/> 
+
+<em>Left: ARGs simulated under flu coalescence model and resolution rate 0.3 and liberal resolve, Right: ARGs simulated under flu coalescence model and resolution rate 0.3 and strict resolve</em>
+
+For comparison see below the $K=2$ and the $K=8$ case using `strict` resolve - results are comparable with the total percentage of missing splits that can be added back increasing with $K$. 
+
+<img src="Figures/PercentageCorrectResolution_k2_flu_0.3_true_false.png" width="49%"/> <img src="Figures/PercentageCorrectResolution_k8_flu_0.3_true_false.png" width="49%"/> 
+
+<em>ARGs simulated under flu coalescence model and resolution rate 0.3 and strict resolve, Left: $K=2$, Right: $K=8$</em>
+
+When we look at the accuracy of the MCCs that we infer the parameter option of `2` rounds, `final-no-resolve` and `pre-resolve` with liberal resolve has the best results - using strict resolve is slightly worse but as this is better for polytomy resolution it is potentially overall a better option. The `1` rounds, `final-no-resolve` and `pre-resolve` option still outweighs all other parameter options in regards to homgenity. 
+
+<img src="Figures/VI_k4_flu_0.3_false_false.png" width="49%"/> <img src="Figures/VI_k4_flu_0.3_true_false.png" width="49%"/> 
+
+<em>ARGs simulated under flu coalescence model and resolution rate 0.3, Left: liberal resolve, Right: strict resolve$K=8$</em>
+
+<img src="Figures/v-measure-complete_k4_flu_0.3_false_false.png" width="49%"/> <img src="Figures/v-measure-complete_k4_flu_0.3_true_false.png" width="49%"/> 
+
+<em>ARGs simulated under flu coalescence model and resolution rate 0.3, Left: liberal resolve, Right: strict resolve$K=8$</em>
+
+<img src="Figures/v-measure-homogenity_k4_flu_0.3_false_false.png" width="49%"/> <img src="Figures/v-measure-homogenity_k4_flu_0.3_true_false.png" width="49%"/> 
+
+<em>ARGs simulated under flu coalescence model and resolution rate 0.3, Left: liberal resolve, Right: strict resolve$K=8$</em>

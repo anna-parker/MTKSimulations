@@ -73,4 +73,4 @@ When we look at the impact of the number of `rounds` used in TreeKnit we see tha
 
 <em>Left and Right: ARGs simulated under Kingman coalescence model, resolution rate 0.3 and strict resolve </em>
 
-We also investigated the impact of the `pre-resolve` parameter as well as the `final-no-resolve` parameter.
+We also investigated the impact of the `pre-resolve` parameter as well as the `final-no-resolve` parameter and find this to be a more optimal parameter configuration - see the `Consistency` section.  
