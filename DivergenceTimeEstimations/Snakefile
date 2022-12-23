@@ -74,6 +74,7 @@ rule test_treetime_inference:
     shell:
         """
         python treetime_arg_test.py -i sim_{wildcards.simtype}_{wildcards.res}_{wildcards.strict} -o results/results_{wildcards.simtype}_{wildcards.res}_{wildcards.strict} -k {wildcards.key} -n {params.rounds}
+        rm -r sim_{wildcards.simtype}_{wildcards.res}_{wildcards.strict}/sim_{wildcards.key}_*
         """
 
 
