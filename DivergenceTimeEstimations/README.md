@@ -47,4 +47,12 @@ We note that although no branches are removed in this simulation for better comp
 
 <em>Left: ARGs simulated under flu coalescence model, resolution rate 0.35 and strict resolve, Right: ARGs ARGs simulated under kingman coalescence model, resolution rate 0.35 and strict resolve,</em>
 
-We also note the large outliers seen for higher reassortment rates in the mean branch length differences. This is most likely due to the impact of FP shared branches - however more simulations would be needed to properly assess this. 
+We also note the large outliers seen for higher reassortment rates in the mean branch length differences. This is most likely due to the impact of FP shared branches.
+
+This can be better visualized by looking at $K=2$ explicitly and splitting branches into categories depending if they are shared between the two trees or not and if this is correctly or incorrectly inferred by TreeKnit. Thus, we split branches into true positive i.e. shared and correctly inferred as shared (TP), true negative i.e. not shared and correctly inferred as not shared (TN) and false positive (FP) and false negative (FN). 
+
+<img src="Figures/K2_mean_divergence_times_flu_0.35_true.png" width="49%"/> <img src="Figures/K2_var_divergence_times_flu_0.35_true.png" width="49%"/> 
+
+<em>ARGs simulated under flu coalescence model, resolution rate 0.35 and strict resolve, split into categories depending on accuracy of shared branches inference</em>
+
+Note that there are almost no not shared branches for low reassortment rates, this results in the low variance and large mean for branches outside the TP category at low reassortment rates. Notably, the variance is halved for the TP category by using information from the second tree at all reassortment rates. Branches that were inferred to not be shared across the two trees (FN and TN) are not effected by using information from the other tree - as is expected. For FP branches i.e. branches that were incorrectly labeled as shared, the variance increases when using information from the other tree, the mean fluctuates inconsistently. 

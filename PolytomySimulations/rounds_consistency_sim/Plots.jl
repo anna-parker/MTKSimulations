@@ -55,13 +55,13 @@ for consistent in params["CONSISTENT"]
                 for k in [2,4,8]
                     p = plot(recomb_rate, c_mean_[(params["ROUNDS"][1], k, 0, 0)], label="r="*string(params["ROUNDS"][1])*", %correct", ylabel="%correct new splits", xlabel="recombination rate", linecolor=l_color[1], title="% Resolved Polytomies for Average Tree in "*string(k)*"-Tree ARG", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :outertopleft, legendfontsize=6)    
                     for r in params["ROUNDS"]
-                        pos = parse(Int,r) + 4*(parse(Int,r)-1)
+                        pos = 1 + 4*(parse(Int,r)-1)
                         if r != params["ROUNDS"][1]
                             plot!(recomb_rate, c_mean_[(r, k, 0, 0)], label="r="*string(r)*", %correct", ylabel="", xlabel="recombination rate", linecolor=l_color[pos])
                         end
                         plot!(recomb_rate, ic_mean_[(r, k, 0, 0)], label="r="*string(r)*", %incorrect", ylabel="", xlabel="recombination rate", linecolor=l_color[pos],linestyle=:dash)
                         for (i, (vals, name)) in enumerate(zip([(1,0), (0,1), (1,1)], ["pre-r", "final-no-r", "pre-r, final-no-r"]))
-                            pos = parse(Int,r) +i+ 4*(parse(Int,r) -1)
+                            pos = 1 +i+ 4*(parse(Int,r) -1)
                             plot!(recomb_rate, c_mean_[(r, k, vals...)], label="r="*string(r)*", %correct, "*name, ylabel="", xlabel="recombination rate", linecolor=l_color[pos])
                             plot!(recomb_rate, ic_mean_[(r, k, vals...)], label="r="*string(r)*", %incorrect. "*name, ylabel="", xlabel="recombination rate", linecolor=l_color[pos],linestyle=:dash)
                         end
