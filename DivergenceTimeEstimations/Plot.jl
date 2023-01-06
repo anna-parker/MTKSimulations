@@ -11,12 +11,15 @@ recomb_rate = [round(10^e, digits=4) for e in range(-4, 0, length(params["REC"])
 l_color = ["darkblue", "blue", "lightblue", "purple", "magenta", "red", "orange", "brown"]
 x_ticks= [round(10^e, digits=4) for e in range(-4, 0, 5)]
 
-function append_vector_to_dict(dict_, key, vector)
+function append_vector_to_dict(dict_, key, vector; length_=false)
     mean_vector = filter(p->!ismissing(p), vector)
     if length(mean_vector) == 0
         sum_ = NaN
     else
         sum_ = sum(mean_vector)/length(mean_vector)
+    end
+    if length_
+        sum_ = (sum_/(2*params["n"] - 4))*100
     end
     if !haskey(dict_, key)
         dict_[key] = [sum_] 
@@ -32,11 +35,13 @@ for sim in params["SIMTYPE"]
             mean_ = Dict()
             median_ = Dict()
             var_ = Dict()
+            length_ = Dict()
             if params["SEGMENTS"] ==2
                 for val in ["TP", "TN", "FN", "FP"]
                     mean_[val] = Dict()
                     median_[val] = Dict()
                     var_[val] = Dict()
+                    length_[val] = Dict()
                 end
             end
             for (n, rec) in enumerate(params["REC"])
@@ -49,9 +54,11 @@ for sim in params["SIMTYPE"]
                             append_vector_to_dict(mean_[val], 1, df[:, val*"_mean_old"])
                             append_vector_to_dict(median_[val], 1, df[:, val*"_median_old"])
                             append_vector_to_dict(var_[val], 1, df[:, val*"_var_old"])
+                            append_vector_to_dict(length_[val], 1, df[:, val*"_length"]; length_=true)
                             append_vector_to_dict(mean_[val], k, df[:, val*"_mean_arg"])
                             append_vector_to_dict(median_[val], k, df[:, val*"_median_arg"])
                             append_vector_to_dict(var_[val], k, df[:, val*"_var_arg"])
+                            append_vector_to_dict(length_[val], k, df[:, val*"_length"]; length_=true)
                         end
                     else 
                         if k==2 
@@ -67,16 +74,26 @@ for sim in params["SIMTYPE"]
             end
             if params["SEGMENTS"] == 2
                 for (name, vector) in zip(["mean", "median", "var"], [mean_, median_, var_])
-                    p = plot(recomb_rate, vector["TP"][1], label="k=1 (standard), TP", ylabel=name, xlabel="recombination rate", linecolor=l_color[2], linestyle=:dash, title="Difference Divergence Time Estimates ("*name*")", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :outertopleft, legendfontsize=6)
+                    xpad = 20   # adjust function of font size
+                    p1 = plot(recomb_rate, vector["TP"][1], widen = false, label="k=1, TP", ylabel=name, xlabel="recombination rate", linecolor=l_color[2], linestyle=:dash, link=:xaxis!, title="Difference Divergence Time Estimates ("*name*")", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :topright, legendfontsize=6)
                     for (i, val) in enumerate(["TP", "TN", "FN", "FP"])
                         pos = 2*i
                         if val !="TP"
-                            plot!(recomb_rate, vector[val][1], label="k=1 (standard), "*val, ylabel=name, xlabel="recombination rate", linecolor=l_color[pos], linestyle=:dash)
+                            plot!(recomb_rate, vector[val][1], label="k=1, "*val, ylabel=name, xlabel="recombination rate", linecolor=l_color[pos], linestyle=:dash)
                         end
                         for no_trees in range(2,params["SEGMENTS"])
                             plot!(recomb_rate, vector[val][no_trees], label="k="*string(no_trees)*", "*val, ylabel=name, xlabel="recombination rate", linecolor=l_color[pos])
                         end
                     end
+                    vspan!([recomb_rate[end], recomb_rate[end]+xpad], c=:white, lc=:white, label=false)
+                    p2 = plot(recomb_rate, length_["TP"][1], widen = false,  ylabel = "% shared branches", ylim = [0,100], xaxis= :log10, label="%TP", linecolor=l_color[2], link=:xaxis, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :topright, legendfontsize=6)
+                    for (i, val) in enumerate(["TN", "FN", "FP"])
+                        pos = 2*(i+1) 
+                        plot!(recomb_rate, length_[val][1], label="%"*val,  ylabel = "% shared branches", xlabel="recombination rate", linecolor=l_color[pos], linestyle=:dash)
+                    end
+                    vspan!([recomb_rate[end], recomb_rate[end]+xpad], c=:white, lc=:white, label=false)
+                    l = @layout [a{0.7h} ; b]
+                    p = plot(p1, p2, layout = l, link = :recomb_rate)
                     savefig(p, "Plots/"*name*"_divergence_times_"*sim*"_"*res*"_"*strict*".png")
                 end
             else

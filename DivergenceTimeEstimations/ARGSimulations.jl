@@ -85,7 +85,7 @@ function simulate(n::Int, rec_rate::Number, outfolder::AbstractString; remove=fa
     L = 1000
     N = 10_000
     c = MTKTools.get_c(res_rate, rec_rate; n=n, simtype)
-    μ = 4/(N*c*L*3)
+    μ = 1/(N*c*L)
 
     ##simulate trees and evolve segments
     trees, arg = MTKTools.get_trees(8, n; c, ρ = r, simtype, s)
@@ -99,7 +99,7 @@ function simulate(n::Int, rec_rate::Number, outfolder::AbstractString; remove=fa
     end
     for i in k_vals
         trees[i].label = string(i)
-        evolve!(trees[i], L, μ);
+        evolve!(trees[i], L, (4/3)* μ);
         write_seq2fasta(trees[i], string(i), outfolder, only_terminals=true, remove_0_mutations=false, write_date=false);
         write_real_tree!(trees[i], μ, "true_segment_"*string(i), outfolder)
     end

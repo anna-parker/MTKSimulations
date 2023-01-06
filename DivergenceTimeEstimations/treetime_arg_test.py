@@ -106,8 +106,9 @@ def compute_average_dist_dict(true_tree, tt_old, tt_arg, val=None, shared_dict=N
     node_names = branch_lengths_true.keys()
     if shared_dict is not None:
         node_names = [n for n in node_names if shared_dict.get(n, 0) == val]
+        l = len(node_names)
     if len(node_names) == 0:
-        return {"median_old": np.nan, "mean_old": np.nan, "var_old": np.nan, "median_arg": np.nan, "mean_arg": np.nan, "var_arg": np.nan}
+        return {"median_old": np.nan, "mean_old": np.nan, "var_old": np.nan, "median_arg": np.nan, "mean_arg": np.nan, "var_arg": np.nan, "length": 0}
 
     epsilon = 1e-12
     old_dist_vector = [(branch_lengths_old.get(n,0) - branch_lengths_true.get(n,0))/np.sqrt(branch_lengths_true.get(n,0)+ epsilon) for n in node_names]
@@ -116,7 +117,7 @@ def compute_average_dist_dict(true_tree, tt_old, tt_arg, val=None, shared_dict=N
     old_dist_vector_full_norm = [(branch_lengths_old.get(n,0) - branch_lengths_true.get(n,0))/(branch_lengths_true.get(n,0)+ epsilon) for n in node_names]
     arg_dist_vector_full_norm = [(branch_lengths_arg.get(n,0) - branch_lengths_true.get(n,0))/(branch_lengths_true.get(n,0)+ epsilon) for n in node_names]
     
-    return {"median_old": np.median(old_dist_vector_full_norm), "mean_old": np.mean(old_dist_vector_full_norm), "var_old": np.var(old_dist_vector), "median_arg": np.median(arg_dist_vector_full_norm), "mean_arg": np.mean(arg_dist_vector_full_norm), "var_arg": np.var(arg_dist_vector)}
+    return {"median_old": np.median(old_dist_vector_full_norm), "mean_old": np.mean(old_dist_vector_full_norm), "var_old": np.var(old_dist_vector), "median_arg": np.median(arg_dist_vector_full_norm), "mean_arg": np.mean(arg_dist_vector_full_norm), "var_arg": np.var(arg_dist_vector), "length": l}
 
 
 def compute_average_dist(true_tree, tt_old, tt_arg, pair=False, shared_dict=None):
@@ -125,7 +126,7 @@ def compute_average_dist(true_tree, tt_old, tt_arg, pair=False, shared_dict=None
     else:
         dist_dict = {}
         for val in ["TP", "TN", "FP", "FN"]:
-            dist_dict[val] = compute_average_dist_dict(true_tree, tt_old, tt_arg, val=val, shared_dict=shared_dict)
+            dist_dict[val]= compute_average_dist_dict(true_tree, tt_old, tt_arg, val=val, shared_dict=shared_dict)
         return dist_dict
 
 def append_val(dict_, key, vector, name):
@@ -149,6 +150,7 @@ def run_inference_on_all_rec_folders(out_dir, key, no_sim):
     median_arg = {}
     mean_arg = {}
     var_arg = {}
+    _length = {}
     if pair:
         dict_ = {}
         for val in ["TP", "TN", "FP", "FN"]:
@@ -158,6 +160,7 @@ def run_inference_on_all_rec_folders(out_dir, key, no_sim):
             median_arg[val] = {}
             mean_arg[val] = {}
             var_arg[val] = {}
+            _length[val] = {}
         for folder in all_rec_folders:
             diff_list = run_inference_on_1_folder(folder, pair)
             for val in ["TP", "TN", "FP", "FN"]:
@@ -169,8 +172,9 @@ def run_inference_on_all_rec_folders(out_dir, key, no_sim):
                     append_val(median_arg[val], k, vector, "median_arg")
                     append_val(mean_arg[val], k, vector, "mean_arg")
                     append_val(var_arg[val], k, vector, "var_arg")
+                    append_val(_length[val], k, vector, "length")
         for val in ["TP", "TN", "FP", "FN"]:
-            dict_[val] = {"median_old": median_old[val], "mean_old": mean_old[val], "var_old": var_old[val], "median_arg": median_arg[val], "mean_arg": mean_arg[val], "var_arg": var_arg[val]}
+            dict_[val] = {"median_old": median_old[val], "mean_old": mean_old[val], "var_old": var_old[val], "median_arg": median_arg[val], "mean_arg": mean_arg[val], "var_arg": var_arg[val], "length": _length[val]}
         return dict_
     else:
         for folder in all_rec_folders:
@@ -190,7 +194,7 @@ def write_results(data_full, results_dir, key):
         for k in range(2,3):
             data = {}
             for val in ["TP", "TN", "FP", "FN"]:
-                for name in ["median_old", "mean_old", "var_old", "median_arg", "mean_arg", "var_arg"]:
+                for name in ["median_old", "mean_old", "var_old", "median_arg", "mean_arg", "var_arg", "length"]:
                     data[val+"_"+name] = data_full[val][name][k]
             df = pd.DataFrame(data)
             if not os.path.isdir(results_dir):
