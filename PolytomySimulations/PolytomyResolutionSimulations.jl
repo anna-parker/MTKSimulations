@@ -126,6 +126,14 @@ function new_tree_RF_dist(true_trees, test_trees)
     return rf
 end
 
+function resolve_using_realMCCs!(trees, rMCCs; strict=true)
+    l_t = length(trees)
+    for i in 1:(l_t-1), j in (i+1):l_t
+        MCCs = get(rMCCs, trees[i].label, trees[j].label)
+        TreeKnit.resolve!(trees[i], trees[j], MCCs; tau = 0., strict)
+    end
+end
+
 function run_tree_poly_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; simtype = :flu, res=0.3, strict=true, k_range=2:8, rounds=2, consistent=false, final_no_resolve=false, pre_resolve=false)
     r = 10^rec_rate
     percent_correct_new_splits_vector = Dict()
@@ -137,6 +145,8 @@ function run_tree_poly_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_r
     for i in 1:no_sim
         c = get_c(res, rec_rate; n=no_lineages, simtype)
         true_trees, arg = MTKTools.get_trees(8, no_lineages; c, ρ = r, simtype)
+        rMCCs = MTKTools.get_real_MCCs(8, arg)
+        rMCCs = TreeKnit.MCC_set(8, [t.label for t in true_trees], rMCCs)
         for no_trees in k_range
             rand_order = sample(1:8, no_trees, replace = false)
             unresolved_trees = [copy(t) for t in true_trees[rand_order]]
@@ -158,11 +168,40 @@ function run_tree_poly_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_r
             else
                 append!(percent_incorrect_new_splits_i[no_trees], incorrect_new_splits_i[1])
             end
+
+            if no_trees == 8
+                i_trees_for_rMCCs = [copy(t) for t in unresolved_trees]
+                resolve_using_realMCCs!(i_trees_for_rMCCs, rMCCs; strict=true)
+                correct_new_splits_rMCC, incorrect_new_splits_rMCC = new_split_accuracy([true_trees[rand_order][loc]], [unresolved_trees[loc]], [i_trees_for_rMCCs[loc]])
+                if !haskey(percent_correct_new_splits_i, 0)
+                    percent_correct_new_splits_i[0] = [correct_new_splits_rMCC[1]]
+                else
+                    append!(percent_correct_new_splits_i[0], correct_new_splits_rMCC[1])
+                end
+                if !haskey(percent_incorrect_new_splits_i, 0)
+                    percent_incorrect_new_splits_i[0] = [incorrect_new_splits_rMCC[1]]
+                else
+                    append!(percent_incorrect_new_splits_i[0], incorrect_new_splits_rMCC[1])
+                end
+                rand_MCC = sample(1:8, 2, replace = false)
+                MCCs = get(rMCCs, rand_MCC...)
+                average_size_MCC = sum([length(m) for m in MCCs])/length(MCCs)
+                if !haskey(percent_correct_new_splits_i, 1)
+                    percent_correct_new_splits_i[1] = [average_size_MCC]
+                else
+                    append!(percent_correct_new_splits_i[1], average_size_MCC)
+                end
+                if !haskey(percent_incorrect_new_splits_i, 1)
+                    percent_incorrect_new_splits_i[1] = [average_size_MCC]
+                else
+                    append!(percent_incorrect_new_splits_i[1], average_size_MCC)
+                end
+            end
         end
     end
     CI_new_splits_correct = []
     CI_new_splits_incorrect = []
-    for no_trees in k_range
+    for no_trees in vcat([0, 1], k_range)
         cs_ = sort(percent_correct_new_splits_i[no_trees])
         ics_ = sort(percent_incorrect_new_splits_i[no_trees])
         CI_new_splits_correct = [cs_[Int(round(no_sim*0.05))+1], cs_[Int(round(no_sim*0.95))]]
@@ -259,7 +298,8 @@ function main()
         write_output_to_file(o*"/results_rf_"*string(r)*".txt", rf_info; k_range)
     else
         percent_correct_new_splits_vector, percent_incorrect_new_splits_vector = run_tree_poly_accuracy_simulations(num_sim, n, r; simtype, res, strict, rounds, k_range, consistent, final_no_resolve, pre_resolve)
-        write_output(o, percent_correct_new_splits_vector, percent_incorrect_new_splits_vector, r; k_range)
+        new_range = vcat([0, 1], collect(k_range))
+        write_output(o, percent_correct_new_splits_vector, percent_incorrect_new_splits_vector, r; k_range=new_range)
     end
 end
 
