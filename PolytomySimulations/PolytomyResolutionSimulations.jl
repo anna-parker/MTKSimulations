@@ -128,9 +128,11 @@ end
 
 function resolve_using_realMCCs!(trees, rMCCs; strict=true)
     l_t = length(trees)
-    for i in 1:(l_t-1), j in (i+1):l_t
-        MCCs = get(rMCCs, trees[i].label, trees[j].label)
-        TreeKnit.resolve!(trees[i], trees[j], MCCs; tau = 0., strict)
+    for k in 1:8
+        for i in 1:(l_t-1), j in (i+1):l_t
+            MCCs = get(rMCCs, trees[i].label, trees[j].label)
+            TreeKnit.resolve!(trees[i], trees[j], MCCs; tau = 0., strict)
+        end
     end
 end
 
