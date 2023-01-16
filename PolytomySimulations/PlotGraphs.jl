@@ -60,7 +60,7 @@ for sim in params["SIMTYPE"]
             end
             
             xpad = 70  # adjust function of font size
-            p1 = plot(recomb_rate, c_mean_[0] .* 100, widen = false, label="rMCCs, %correct", ylabel="% correct new splits", xlabel="recombination rate", linecolor="black", link=:xaxis, title="% Resolved Polytomies for Average Tree in k-Tree ARG", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :topright, legendfontsize=6)
+            p1 = plot(recomb_rate, c_mean_[0] .* 100, widen = false, label="rMCCs, %correct", ylabel="% correct new splits", xlabel="recombination rate", linecolor="black", link=:xaxis, title="% Resolved Polytomies for Average Tree in k-Tree Sample", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :topright, legendfontsize=6)
             plot!(recomb_rate, ic_mean_[0] .* 100, label="rMCCs, %incorrect", ylabel="% correct new splits", xlabel="recombination rate", linecolor="black",linestyle=:dash)
             for no_trees in 2:8
                 plot!(recomb_rate, c_mean_[no_trees] .* 100, label="k="*string(no_trees)*", %correct", ylabel="% correct new splits", xlabel="recombination rate", linecolor=l_color[no_trees-1])
@@ -72,7 +72,7 @@ for sim in params["SIMTYPE"]
             l = @layout [a{0.7h} ; b]
             p = plot(p1, p2, layout = l, link = :recomb_rate)
             savefig(p, "Plots/PercentageCorrectResolution_"*sim*"_"*res*"_"*strict*".png")
-            p = plot(recomb_rate, rf_mean_[2], label="k=2, improvement RF distance", ylabel="RF distance to true tree tree, unresolved - infered", xlabel="recombination rate", linecolor=l_color[1], title="Improvement in RF distance - Average Tree in k-Tree ARG", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :outertopleft, legendfontsize=6)
+            p = plot(recomb_rate, rf_mean_[2], label="k=2, improvement RF distance", ylabel="RF distance to true tree tree, unresolved - infered", xlabel="recombination rate", linecolor=l_color[1], title="Improvement in RF distance - Average Tree in k-Tree Sample", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :outertopleft, legendfontsize=6)
             for no_trees in 3:8
                 plot!(recomb_rate, rf_mean_[no_trees], label="k="*string(no_trees)*", improvement RF distance", ylabel="RF distance to true tree tree, unresolved - infered", xlabel="recombination rate", linecolor=l_color[no_trees-1])
             end

@@ -38,8 +38,8 @@ rule run_simulations:
         res = "(0.3|0.35|0.4)",
     shell:
      """
-        julia -J polytomy_simulations.so --project=../. PolytomyResolutionSimulations.jl --o "results/results_{wildcards.simtype}_{wildcards.res}_{wildcards.strict}" --rec {wildcards.rec} --n {params.n_leaves} --sim {params.rounds} --simtype {wildcards.simtype} --strict {wildcards.strict} --res {wildcards.res} --rounds 2 --final-no-resolve true --pre-resolve true
-        julia -J polytomy_simulations.so --project=../. PolytomyResolutionSimulations.jl --o "results/results_{wildcards.simtype}_{wildcards.res}_{wildcards.strict}" --rec {wildcards.rec} --n {params.n_leaves} --sim {params.rounds} --simtype {wildcards.simtype} --strict {wildcards.strict} --res {wildcards.res} --metric rf --rounds 2 --final-no-resolve true --pre-resolve true
+        julia -J polytomy_simulations.so --project=../. PolytomyResolutionSimulations.jl --o "results/results_{wildcards.simtype}_{wildcards.res}_{wildcards.strict}" --rec {wildcards.rec} --n {params.n_leaves} --sim {params.rounds} --simtype {wildcards.simtype} --strict {wildcards.strict} --res {wildcards.res} --rounds 1 --final-no-resolve true --pre-resolve true
+        julia -J polytomy_simulations.so --project=../. PolytomyResolutionSimulations.jl --o "results/results_{wildcards.simtype}_{wildcards.res}_{wildcards.strict}" --rec {wildcards.rec} --n {params.n_leaves} --sim {params.rounds} --simtype {wildcards.simtype} --strict {wildcards.strict} --res {wildcards.res} --metric rf --rounds 1 --final-no-resolve true --pre-resolve true
      """
 
 rule plot_graphs:
