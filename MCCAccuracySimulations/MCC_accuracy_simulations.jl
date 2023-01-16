@@ -70,21 +70,27 @@ function parse_commandline()
     return parse_args(s)
 end
 
-function write_output(outfolder, data_standard, type, rec_rate; k_range=2:8)
+function write_output(outfolder, data_standard, data_size, type, rec_rate; k_range=2:8)
     if !isdir(outfolder)
         mkdir(outfolder)
     end
     filename = "results_"*type*"_"*string(rec_rate)*".txt"
-    write_output_to_file(outfolder*"/"*filename, data_standard; k_range)
+    write_output_to_file(outfolder*"/"*filename, data_standard, data_size, ; k_range)
 end
 
-function write_output_to_file(filename, full_data; k_range=2:8)
+function write_output_to_file(filename, full_data, data_size; k_range=2:8)
     open(filename, "w") do io
         write(io, "k\tlCI\tuCI\tmean\tmedian\n")
         for k in k_range
             data = full_data[k]
             write(io, string(k) *"\t"*string(data["lCI"])*"\t"*string(data["uCI"])*"\t"*string(data["mean"])*"\t"*string(data["median"])*"\n")
         end
+        new_range = vcat([1], collect(k_range))
+        for k in new_range
+            data = data_size[k]
+            write(io, string(k+8) *"\t"*string(data["lCI"])*"\t"*string(data["uCI"])*"\t"*string(data["mean"])*"\t"*string(data["median"])*"\n")
+        end
+
     end
 end
 
@@ -129,6 +135,7 @@ end
 
 function run_one_sim(no_lineages::Int, rec_rate::Float64, type, strict, simtype, res, k_range, rounds, consistent, final_no_resolve, pre_resolve)
     a_index_i_vector = Dict()
+    size_vector = Dict()
     
     c = get_c(res, rec_rate; n=no_lineages, simtype)
     r = 10^rec_rate
@@ -154,27 +161,40 @@ function run_one_sim(no_lineages::Int, rec_rate::Float64, type, strict, simtype,
         else
             a_index_i = TestRecombTools.rand_index_similarity(TreeKnit.get(rMCCs, names...), TreeKnit.get(i_MCCs, names...))
         end
-        
-        a_index_i_vector[no_trees] = a_index_i
-    end
 
-    return a_index_i_vector
+        a_index_i_vector[no_trees] = a_index_i
+
+        size_infered_MCCs = sum([length(m) for m in TreeKnit.get(i_MCCs, names...)])/length(MCCs)
+        size_vector[no_trees] = size_infered_MCCs
+    end
+    rand_MCC = sample(1:8, 2, replace = false)
+    MCCs = get(rMCCs, rand_MCC...)
+    average_size_MCC = sum([length(m) for m in MCCs])/length(MCCs)
+    size_vector[1] = average_size_MCC
+
+    return a_index_i_vector, size_vector
 end
 
 function run_MCC_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; type="VI", strict=true, simtype=:flu, res=0.3, k_range=2:8, rounds=2, consistent=false, final_no_resolve=false, pre_resolve=false)
     average_accuracy_i = Dict()
+    average_size_i = Dict()
     accuracy_index_i = Dict{Int, Vector{Float32}}()
+    size_index_i = Dict{Int, Vector{Float32}}()
     sim_results = Dict()
+    new_range = vcat([1], collect(k_range))
     for i in 1:no_sim
         sim_results[i] = Dagger.@spawn run_one_sim(no_lineages, rec_rate, type, strict, simtype, res, k_range, rounds, consistent, final_no_resolve, pre_resolve)
     end
-    for no_trees in k_range
+    for no_trees in [1, k_range...]
         accuracy_index_i[no_trees] = Float32[]
     end
     for i in 1:no_sim
         sim_result = fetch(sim_results[i])
         for no_trees in k_range
-            push!(accuracy_index_i[no_trees], sim_result[no_trees])
+            push!(accuracy_index_i[no_trees], sim_result[1][no_trees])
+        end
+        for no_trees in new_range
+            push!(size_index_i[no_trees], sim_result[2][no_trees])
         end
     end
     for no_trees in k_range
@@ -184,7 +204,14 @@ function run_MCC_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::F
 
         average_accuracy_i[no_trees] = dict
     end  
-    return  average_accuracy_i
+    for no_trees in new_range
+        size_vector_i = sort(size_index_i[no_trees])
+        CI = [accuracy_vector_i[Int(round(no_sim*0.05))+1], size_vector_i[Int(round(no_sim*0.95))]]
+        dict = Dict("lCI" =>CI[1], "mean" => sum(size_vector_i)/no_sim, "uCI" =>CI[2], "median" => size_vector_i[Int(round(no_sim*0.5))] )
+
+        average_size_i[no_trees] = dict
+    end 
+    return  average_accuracy_i, average_size_i
 end
 
 function main()
@@ -224,8 +251,8 @@ function main()
     end
     println("Simulating ARGs and sequences of sample size $n and recombination rate $r simtype $simt")
 
-    vi_accuracy_i = run_MCC_accuracy_simulations(num_sim, n, r; type=metric, strict, simtype, res, k_range, rounds, consistent, final_no_resolve, pre_resolve)
-    write_output(o, vi_accuracy_i, metric, r; k_range)
+    vi_accuracy_i, size_mccs_i = run_MCC_accuracy_simulations(num_sim, n, r; type=metric, strict, simtype, res, k_range, rounds, consistent, final_no_resolve, pre_resolve)
+    write_output(o, vi_accuracy_i, size_mccs_i, metric, r; k_range)
 
 
 end
