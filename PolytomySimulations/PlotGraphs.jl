@@ -12,6 +12,14 @@ pre_recomb_rate = [round(10^e, digits=4) for e in range(-4, 0, length(params["RE
 l_color = ["darkblue", "blue", "lightblue", "purple", "magenta", "red", "orange"]
 pre_x_ticks= [round(10^e, digits=4) for e in range(-4, 0, 5)]
 
+function add_to_dict_vec(dict_, file, key)
+    if !haskey(dict_, key)
+        dict_[0] = file[(file.k .== key), :].mean
+    else
+        append!(dict_[0], file[(file.k .== key), :].mean)
+    end
+end
+
 for x_axis in ["scaled", "true"]
     for sim in params["SIMTYPE"]
         for res in params["RES"]
@@ -26,43 +34,20 @@ for x_axis in ["scaled", "true"]
                     ic_file = CSV.read(filename, DataFrame)
                     filename = "results/results_"*sim*"_"*res*"_"*strict*"/results_rf_"*string(rec)*".txt"
                     rf_file = CSV.read(filename, DataFrame)
-                    if !haskey(ic_mean_, 0)
-                        ic_mean_[0] = ic_file[(ic_file.k .== 0), :].mean
-                    else
-                        append!(ic_mean_[0], ic_file[(ic_file.k .== 0), :].mean)
-                    end
-                    if !haskey(c_mean_, 0)
-                        c_mean_[0] = c_file[(c_file.k .== 0), :].mean
-                    else
-                        append!(c_mean_[0], c_file[(c_file.k .== 0), :].mean)
-                    end
-                    if !haskey(c_mean_, 1)
-                        c_mean_[1] = c_file[(c_file.k .== 1), :].mean
-                    else
-                        append!(c_mean_[1], c_file[(c_file.k .== 1), :].mean)
-                    end
+                    add_to_dict_vec(ic_mean_, ic_file, 0)
+                    add_to_dict_vec(c_mean_, c_file, 0)
+                    add_to_dict_vec(c_mean_, c_file, 1)
                     for k in 2:8
-                        if !haskey(ic_mean_, k)
-                            ic_mean_[k] = ic_file[(ic_file.k .== k), :].mean
-                        else
-                            append!(ic_mean_[k], ic_file[(ic_file.k .== k), :].mean)
-                        end
-                        if !haskey(c_mean_, k)
-                            c_mean_[k] = c_file[(c_file.k .== k), :].mean
-                        else
-                            append!(c_mean_[k], c_file[(c_file.k .== k), :].mean)
-                        end
-                        if !haskey(rf_mean_, k)
-                            rf_mean_[k] = rf_file[(rf_file.k .== k), :].mean
-                        else
-                            append!(rf_mean_[k], rf_file[(rf_file.k .== k), :].mean)
-                        end
+                        add_to_dict_vec(ic_mean_, ic_file, k)
+                        add_to_dict_vec(c_mean_, c_file, k)
+                        add_to_dict_vec(rf_mean_, rf_file, k)
                     end
                 end
                 if x_axis =="scaled"
                     x_axis_title = "scaled recombination rate (ρ)"
                     recomb_rate = pre_recomb_rate
                     x_ticks = pre_x_ticks
+                    xpad = 70  # adjust function of font size
                 else
                     if sim== "kingman"
                         alpha = 1.0
@@ -72,8 +57,8 @@ for x_axis in ["scaled", "true"]
                     recomb_rate = ((1/10000)*(params["n"]/2)^alpha) .* pre_recomb_rate
                     x_ticks = ((1/10000)*(params["n"]/2)^alpha) .* pre_x_ticks
                     x_axis_title = "true recombination rate (r)"
+                    xpad = ((1/10000)*(params["n"]/2)^alpha)*70  # adjust function of font size   
                 end
-                xpad = 70  # adjust function of font size
                 p1 = plot(recomb_rate, c_mean_[0] .* 100, widen = false, label="rMCCs, %correct", ylabel="% correct new splits", xlabel=x_axis_title , linecolor="black", link=:xaxis, title="% Resolved Polytomies for Average Tree in k-Tree Sample", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :topright, legendfontsize=6)
                 plot!(recomb_rate, ic_mean_[0] .* 100, label="rMCCs, %incorrect", ylabel="% correct new splits", xlabel=x_axis_title , linecolor="black",linestyle=:dash)
                 for no_trees in 2:8
