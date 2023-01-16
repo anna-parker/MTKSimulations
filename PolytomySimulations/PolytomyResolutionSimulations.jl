@@ -136,6 +136,14 @@ function resolve_using_realMCCs!(trees, rMCCs; strict=true)
     end
 end
 
+function add_to_dict_vec(dict_, key, value)
+    if !haskey(dict_, key)
+        dict_[key] = [value]
+    else
+        append!(dict_[key], value)
+    end
+end
+
 function run_tree_poly_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; simtype = :flu, res=0.3, strict=true, k_range=2:8, rounds=2, consistent=false, final_no_resolve=false, pre_resolve=false)
     r = 10^rec_rate
     percent_correct_new_splits_vector = Dict()
@@ -160,44 +168,27 @@ function run_tree_poly_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_r
             loc = rand(1:no_trees)
             correct_new_splits_i, incorrect_new_splits_i = new_split_accuracy([true_trees[rand_order][loc]], [unresolved_trees[loc]], [i_trees[loc]])
             
-            if !haskey(percent_correct_new_splits_i, no_trees)
-                percent_correct_new_splits_i[no_trees] = [correct_new_splits_i[1]]
-            else
-                append!(percent_correct_new_splits_i[no_trees], correct_new_splits_i[1])
-            end
-            if !haskey(percent_incorrect_new_splits_i, no_trees)
-                percent_incorrect_new_splits_i[no_trees] = [incorrect_new_splits_i[1]]
-            else
-                append!(percent_incorrect_new_splits_i[no_trees], incorrect_new_splits_i[1])
-            end
+            add_to_dict_vec(percent_correct_new_splits_i, no_trees, correct_new_splits_i[1])
+            add_to_dict_vec(percent_incorrect_new_splits_i, no_trees, incorrect_new_splits_i[1])
 
             if no_trees == 8
-                i_trees_for_rMCCs = [copy(t) for t in unresolved_trees]
-                resolve_using_realMCCs!(i_trees_for_rMCCs, rMCCs; strict=true)
-                correct_new_splits_rMCC, incorrect_new_splits_rMCC = new_split_accuracy([true_trees[rand_order][loc]], [unresolved_trees[loc]], [i_trees_for_rMCCs[loc]])
-                if !haskey(percent_correct_new_splits_i, 0)
-                    percent_correct_new_splits_i[0] = [correct_new_splits_rMCC[1]]
-                else
-                    append!(percent_correct_new_splits_i[0], correct_new_splits_rMCC[1])
-                end
-                if !haskey(percent_incorrect_new_splits_i, 0)
-                    percent_incorrect_new_splits_i[0] = [incorrect_new_splits_rMCC[1]]
-                else
-                    append!(percent_incorrect_new_splits_i[0], incorrect_new_splits_rMCC[1])
-                end
+                i_trees_for_rMCCs_strict = [copy(t) for t in unresolved_trees]
+                resolve_using_realMCCs!(i_trees_for_rMCCs_strict, rMCCs; strict=true)
+                correct_new_splits_rMCC_strict, incorrect_new_splits_rMCC_strict = new_split_accuracy([true_trees[rand_order][loc]], [unresolved_trees[loc]], [i_trees_for_rMCCs_strict[loc]])
+                add_to_dict_vec(percent_correct_new_splits_i, 0, correct_new_splits_rMCC_strict[1])
+                add_to_dict_vec(percent_incorrect_new_splits_i, 0, incorrect_new_splits_rMCC_strict[1])
+
+                i_trees_for_rMCCs_liberal = [copy(t) for t in unresolved_trees]
+                resolve_using_realMCCs!(i_trees_for_rMCCs_liberal, rMCCs; strict=false)
+                correct_new_splits_rMCC_liberal, incorrect_new_splits_rMCC_liberal = new_split_accuracy([true_trees[rand_order][loc]], [unresolved_trees[loc]], [i_trees_for_rMCCs_liberal[loc]])
+                add_to_dict_vec(percent_correct_new_splits_i, -1, correct_new_splits_rMCC_liberal[1])
+                add_to_dict_vec(percent_incorrect_new_splits_i, -1, incorrect_new_splits_rMCC_liberal[1])
+
                 rand_MCC = sample(1:8, 2, replace = false)
                 MCCs = get(rMCCs, rand_MCC...)
                 average_size_MCC = sum([length(m) for m in MCCs])/length(MCCs)
-                if !haskey(percent_correct_new_splits_i, 1)
-                    percent_correct_new_splits_i[1] = [average_size_MCC]
-                else
-                    append!(percent_correct_new_splits_i[1], average_size_MCC)
-                end
-                if !haskey(percent_incorrect_new_splits_i, 1)
-                    percent_incorrect_new_splits_i[1] = [average_size_MCC]
-                else
-                    append!(percent_incorrect_new_splits_i[1], average_size_MCC)
-                end
+                add_to_dict_vec(percent_correct_new_splits_i, 1, average_size_MCC)
+                add_to_dict_vec(percent_incorrect_new_splits_i, 1, average_size_MCC)
             end
         end
     end
@@ -243,11 +234,7 @@ function run_tree_rf_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rat
                 change = (old_rf[1] - new_rf[1])
             end
 
-            if !haskey(rf_change_vector, no_trees)
-                rf_change_vector[no_trees] = [change]
-            else
-                append!(rf_change_vector[no_trees], [change])
-            end
+            add_to_dict_vec(rf_change_vector, no_trees, change)
         end
     end
 
