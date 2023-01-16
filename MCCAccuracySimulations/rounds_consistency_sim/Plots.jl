@@ -48,12 +48,12 @@ for metric in params["METRIC"]
                         for k in [4,8]
                             p = plot(recomb_rate, tc_mean_[(params["ROUNDS"][1], k, 0, 0)], label="r="*string(params["ROUNDS"][1])*", "*metric, ylabel=metric, xlabel="recombination rate", linecolor=l_color[1], title=metric*" infered to true MCCs in "*string(k)*"-Tree ARG", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :outertopleft, legendfontsize=6)    
                             for r in params["ROUNDS"]
-                                pos = parse(Int,r) + 4*(parse(Int,r)-1)
+                                pos = 1 + 4*(parse(Int,r)-1)
                                 if r != params["ROUNDS"][1]
                                     plot!(recomb_rate, tc_mean_[(r, k, 0, 0)], label="r="*string(r)*", "*metric, ylabel="", xlabel="recombination rate", linecolor=l_color[pos])
                                 end
                                 for (i, (vals, name)) in enumerate(zip([(1,0), (0,1), (1,1)], ["pre-r", "final-no-r", "pre-r, final-no-r"]))
-                                    pos = parse(Int,r) +i+ 4*(parse(Int,r) -1)
+                                    pos = 1 +i+ 4*(parse(Int,r) -1)
                                     plot!(recomb_rate, tc_mean_[(r, k, vals...)], label="r="*string(r)*", "*metric*", "*name, ylabel="", xlabel="recombination rate", linecolor=l_color[pos])
                                 end
                                 savefig(p, "Plots/"*metric*"_k"*string(k)*"_"*sim*"_"*res*"_"*strict*"_"*consistent*".png")
@@ -63,12 +63,12 @@ for metric in params["METRIC"]
                         for k in [4,8]
                             p = plot(recomb_rate, tc_mean_[(params["ROUNDS"][1], k, 0, 0)], label="r="*string(params["ROUNDS"][1])*", "*metric*" dist.", ylabel= metric*" distance", xlabel="recombination rate", linecolor=l_color[1], title= metric*" dist infered from true MCCs in "*string(k)*"-Tree ARG", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :outertopleft, legendfontsize=6)    
                             for r in params["ROUNDS"]
-                                pos = parse(Int,r) + 4*(parse(Int,r)-1)
+                                pos = 1 + 4*(parse(Int,r)-1)
                                 if r != params["ROUNDS"][1]
                                     plot!(recomb_rate, tc_mean_[(r, k, 0, 0)], label="r="*string(r)*", "*metric*" dist.", ylabel="", xlabel="recombination rate", linecolor=l_color[pos])
                                 end
                                 for (i, (vals, name)) in enumerate(zip([(1,0), (0,1), (1,1)], ["pre-r", "final-no-r", "pre-r, final-no-r"]))
-                                    pos = parse(Int,r) +i+ 4*(parse(Int,r) -1)
+                                    pos = 1 +i+ 4*(parse(Int,r) -1)
                                     plot!(recomb_rate, tc_mean_[(r, k, vals...)], label="r="*string(r)*", "*metric*" dist., "*name, ylabel="", xlabel="recombination rate", linecolor=l_color[pos])
                                 end
                                 savefig(p, "Plots/"*metric*"_k"*string(k)*"_"*sim*"_"*res*"_"*strict*"_"*consistent*".png")

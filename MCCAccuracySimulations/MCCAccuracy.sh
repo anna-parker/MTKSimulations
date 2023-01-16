@@ -1,8 +1,8 @@
 #!/bin/sh
 #Reserve 2 CPUs for this job
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=32G
+#SBATCH --cpus-per-task=48
+#SBATCH --mem=48G
 #
 # Request it to run this for HH:MM:SS with ?G per core
 #SBATCH --time=05:59:00
