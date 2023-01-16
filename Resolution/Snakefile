@@ -1,0 +1,48 @@
+configfile: "../test_config.json"
+REC = config.get("REC")
+SIMTYPE = config.get("SIMTYPE")
+RES = config.get("RES")
+
+rule all:
+    input:
+        "results.zip"
+
+rule run_simulations:
+    message:
+        "start simulations in julia"
+    output:
+        "results/results_{simtype}_{res}/results_{rec}.txt",
+    params: 
+        n_leaves = config.get("n"),
+        rounds  = config.get("sim"),
+    wildcard_constraints:
+        rec = "(-4.0|-3.75|-3.5|-3.25|-3.0|-2.75|-2.5|-2.25|-2.0|-1.75|-1.5|-1.25|-1.0|-0.75|-0.5|-0.25|0.0)", 
+        simtype = "(flu|kingman)",
+        res = "(0.3|0.35|0.4)",
+    shell:
+     """
+        julia --project=../. resolution_plots.jl --o "results/results_{wildcards.simtype}_{wildcards.res}" --rec {wildcards.rec} --n {params.n_leaves} --sim {params.rounds} --simtype {wildcards.simtype} --res {wildcards.res}
+    """
+
+rule plot_graphs:
+    input:
+        expand(["results/results_{simtype}_{res}/results_{rec}.txt",], rec=REC, res=RES, simtype=SIMTYPE)
+    output:
+        "Plots.zip"
+    shell:
+        """
+        mkdir Plots
+        julia --project=../. PlotGraphs.jl
+        zip -rm Plots.zip Plots
+        """
+
+rule zip:
+    input:
+        expand(["results/results_{simtype}_{res}/results_{rec}.txt",], rec=REC, res=RES, simtype=SIMTYPE),
+        "Plots.zip"
+    output:
+        "results.zip"
+    shell:
+        """
+        zip -rm results.zip results
+        """
