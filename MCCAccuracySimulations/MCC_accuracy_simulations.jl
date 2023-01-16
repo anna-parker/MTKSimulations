@@ -141,6 +141,9 @@ function run_one_sim(no_lineages::Int, rec_rate::Float64, type, strict, simtype,
         unresolved_trees = MTKTools.remove_branches(unresolved_trees; c)
 
         i_trees = [copy(t) for t in unresolved_trees]
+	println(rounds)
+	println(final_no_resolve)
+	println(pre_resolve)
         i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, consistent, parallel=false, strict, rounds, final_no_resolve, pre_resolve))
         loc = sample(1:no_trees, 2, replace = false)
         names = [t.label for t in true_trees[rand_order][loc]]
