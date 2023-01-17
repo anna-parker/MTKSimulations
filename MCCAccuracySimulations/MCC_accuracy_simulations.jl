@@ -148,9 +148,7 @@ function run_one_sim(no_lineages::Int, rec_rate::Float64, type, strict, simtype,
         unresolved_trees = MTKTools.remove_branches(unresolved_trees; c)
 
         i_trees = [copy(t) for t in unresolved_trees]
-	println(rounds)
-	println(final_no_resolve)
-	println(pre_resolve)
+
         i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, consistent, parallel=false, strict, rounds, final_no_resolve, pre_resolve))
         loc = sample(1:no_trees, 2, replace = false)
         names = [t.label for t in true_trees[rand_order][loc]]
@@ -166,8 +164,8 @@ function run_one_sim(no_lineages::Int, rec_rate::Float64, type, strict, simtype,
         end
 
         a_index_i_vector[no_trees] = a_index_i
-
-        size_infered_MCCs = sum([length(m) for m in TreeKnit.get(i_MCCs, names...)])/length(MCCs)
+        MCCs = TreeKnit.get(i_MCCs, names...)
+        size_infered_MCCs = sum([length(m) for m in MCCs])/length(MCCs)
         size_vector[no_trees] = size_infered_MCCs
     end
     rand_MCC = sample(1:8, 2, replace = false)
@@ -188,8 +186,10 @@ function run_MCC_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::F
     for i in 1:no_sim
         sim_results[i] = Dagger.@spawn run_one_sim(no_lineages, rec_rate, type, strict, simtype, res, k_range, rounds, consistent, final_no_resolve, pre_resolve)
     end
-    for no_trees in [1, k_range...]
+    size_index_i[1] = Float32[]
+    for no_trees in k_range
         accuracy_index_i[no_trees] = Float32[]
+        size_index_i[no_trees] = Float32[]
     end
     for i in 1:no_sim
         sim_result = fetch(sim_results[i])
@@ -209,7 +209,7 @@ function run_MCC_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::F
     end  
     for no_trees in new_range
         size_vector_i = sort(size_index_i[no_trees])
-        CI = [accuracy_vector_i[Int(round(no_sim*0.05))+1], size_vector_i[Int(round(no_sim*0.95))]]
+        CI = [size_vector_i[Int(round(no_sim*0.05))+1], size_vector_i[Int(round(no_sim*0.95))]]
         dict = Dict("lCI" =>CI[1], "mean" => sum(size_vector_i)/no_sim, "uCI" =>CI[2], "median" => size_vector_i[Int(round(no_sim*0.5))] )
 
         average_size_i[no_trees] = dict
