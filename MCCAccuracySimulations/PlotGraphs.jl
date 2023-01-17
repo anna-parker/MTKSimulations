@@ -46,10 +46,16 @@ for x_axis in ["scaled", "true"]
                         x_axis_title = "true reassortment rate (r)"
                         xpad = ((1/10000)*(params["n"]/2)^alpha)*70  # adjust function of font size   
                     end
-
-                    p1 = plot(recomb_rate, _mean_[2], widen = false, label="k=2, "*metric*" dist.", ylabel=metric*" distance", xlabel=x_axis_title , linecolor=l_color[1], link=:xaxis, title=metric*" dist infered from true MCC in k-Tree Sample", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :topright, legendfontsize=6)
+                    if metric =="v-measure-complete"
+                        label_name = "complete"
+                    else if metric =="v-measure-homogenity"
+                        label_name = "homogenity"
+                    else
+                        label_name = metric*" dist."
+                    end
+                    p1 = plot(recomb_rate, _mean_[2], widen = false, label="k=2, "*label_name, ylabel=label_name, xlabel=x_axis_title , linecolor=l_color[1], link=:xaxis, title=metric*" dist infered from true MCC in k-Tree Sample", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :topright, legendfontsize=6)
                     for no_trees in 3:8
-                        plot!(recomb_rate, _mean_[no_trees], label="k="*string(no_trees)*", "*metric*" dist.", ylabel=metric*" distance", xlabel=x_axis_title , linecolor=l_color[no_trees-1])
+                        plot!(recomb_rate, _mean_[no_trees], label="k="*string(no_trees)*", "*label_name, ylabel=label_name, xlabel=x_axis_title , linecolor=l_color[no_trees-1])
                     end
                     vspan!([recomb_rate[end], recomb_rate[end]+xpad], c=:white, lc=:white, label=false)
                     
