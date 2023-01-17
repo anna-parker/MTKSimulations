@@ -77,6 +77,7 @@ for x_axis in ["scaled", "true"]
                     x_axis_title = "scaled reassortment rate (ρ)"
                     recomb_rate = pre_recomb_rate
                     x_ticks = pre_x_ticks
+                    xpad = 20   # adjust function of font size
                 else
                     if sim== "kingman"
                         alpha = 1.0
@@ -86,10 +87,10 @@ for x_axis in ["scaled", "true"]
                     recomb_rate = ((1/10000)*(params["n"]/2)^alpha) .* pre_recomb_rate
                     x_ticks = ((1/10000)*(params["n"]/2)^alpha) .* pre_x_ticks
                     x_axis_title = "true reassortment rate (r)" 
+                    xpad = ((1/10000)*(params["n"]/2)^alpha)*20  # adjust function of font size 
                 end
                 if params["SEGMENTS"] == 2
                     for (name, vector) in zip(["mean", "median", "var"], [mean_, median_, var_])
-                        xpad = 20   # adjust function of font size
                         p1 = plot(recomb_rate, vector["TP"][1], widen = false, label="k=1, TP", ylabel=name, xlabel=x_axis_title, linecolor=l_color[2], linestyle=:dash, link=:xaxis!, title="Difference Divergence Time Estimates ("*name*")", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :topright, legendfontsize=6)
                         for (i, val) in enumerate(["TP", "TN", "FN", "FP"])
                             pos = 2*i
@@ -109,7 +110,7 @@ for x_axis in ["scaled", "true"]
                         vspan!([recomb_rate[end], recomb_rate[end]+xpad], c=:white, lc=:white, label=false)
                         l = @layout [a{0.7h} ; b]
                         p = plot(p1, p2, layout = l, link = :recomb_rate)
-                        savefig(p, "Plots/"*name*"_divergence_times_"*sim*"_"*res*"_"*strict*".png")
+                        savefig(p, "Plots/"*name*"_divergence_times_"*sim*"_"*res*"_"*strict*"_"*x_axis*".png")
                     end
                 else
                     for (name, vector) in zip(["mean", "median", "var"], [mean_, median_, var_])
