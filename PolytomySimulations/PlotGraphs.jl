@@ -14,9 +14,9 @@ pre_x_ticks= [round(10^e, digits=4) for e in range(-4, 0, 5)]
 
 function add_to_dict_vec(dict_, file, key)
     if !haskey(dict_, key)
-        dict_[0] = file[(file.k .== key), :].mean
+        dict_[key] = file[(file.k .== key), :].mean
     else
-        append!(dict_[0], file[(file.k .== key), :].mean)
+        append!(dict_[key], file[(file.k .== key), :].mean)
     end
 end
 
@@ -44,7 +44,7 @@ for x_axis in ["scaled", "true"]
                     end
                 end
                 if x_axis =="scaled"
-                    x_axis_title = "scaled recombination rate (ρ)"
+                    x_axis_title = "scaled reassortment rate (ρ)"
                     recomb_rate = pre_recomb_rate
                     x_ticks = pre_x_ticks
                     xpad = 70  # adjust function of font size
@@ -56,7 +56,7 @@ for x_axis in ["scaled", "true"]
                     end
                     recomb_rate = ((1/10000)*(params["n"]/2)^alpha) .* pre_recomb_rate
                     x_ticks = ((1/10000)*(params["n"]/2)^alpha) .* pre_x_ticks
-                    x_axis_title = "true recombination rate (r)"
+                    x_axis_title = "true reassortment rate (r)"
                     xpad = ((1/10000)*(params["n"]/2)^alpha)*70  # adjust function of font size   
                 end
                 p1 = plot(recomb_rate, c_mean_[0] .* 100, widen = false, label="rMCCs, %correct", ylabel="% correct new splits", xlabel=x_axis_title , linecolor="black", link=:xaxis, title="% Resolved Polytomies for Average Tree in k-Tree Sample", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :topright, legendfontsize=6)

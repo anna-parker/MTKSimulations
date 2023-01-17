@@ -178,12 +178,6 @@ function run_tree_poly_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_r
                 add_to_dict_vec(percent_correct_new_splits_i, 0, correct_new_splits_rMCC_strict[1])
                 add_to_dict_vec(percent_incorrect_new_splits_i, 0, incorrect_new_splits_rMCC_strict[1])
 
-                i_trees_for_rMCCs_liberal = [copy(t) for t in unresolved_trees]
-                resolve_using_realMCCs!(i_trees_for_rMCCs_liberal, rMCCs; strict=false)
-                correct_new_splits_rMCC_liberal, incorrect_new_splits_rMCC_liberal = new_split_accuracy([true_trees[rand_order][loc]], [unresolved_trees[loc]], [i_trees_for_rMCCs_liberal[loc]])
-                add_to_dict_vec(percent_correct_new_splits_i, -1, correct_new_splits_rMCC_liberal[1])
-                add_to_dict_vec(percent_incorrect_new_splits_i, -1, incorrect_new_splits_rMCC_liberal[1])
-
                 rand_MCC = sample(1:8, 2, replace = false)
                 MCCs = get(rMCCs, rand_MCC...)
                 average_size_MCC = sum([length(m) for m in MCCs])/length(MCCs)

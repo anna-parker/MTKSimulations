@@ -39,7 +39,7 @@ rule run_simulations:
         res = "(0.1|0.2|0.25|0.3|0.35|0.4)",
     shell:
      """
-        julia -J mcc_accuracy_simulations.so --project=../.  MCC_accuracy_simulations.jl --o "results/results_{wildcards.simtype}_{wildcards.res}_{wildcards.strict}/" --rec {wildcards.rec} --n {params.n_leaves} --sim {params.rounds} --metric {wildcards.m} --strict {wildcards.strict} --simtype {wildcards.simtype} --res {wildcards.res} --rounds 2 --pre-resolve true --final-no-resolve false 
+        julia -J mcc_accuracy_simulations.so --project=../.  MCC_accuracy_simulations.jl --o "results/results_{wildcards.simtype}_{wildcards.res}_{wildcards.strict}/" --rec {wildcards.rec} --n {params.n_leaves} --sim {params.rounds} --metric {wildcards.m} --strict {wildcards.strict} --simtype {wildcards.simtype} --res {wildcards.res} --rounds 1 --pre-resolve true --final-no-resolve true 
      """
 
 rule plot_graphs:
