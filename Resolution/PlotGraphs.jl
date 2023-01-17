@@ -32,7 +32,7 @@ for x_axis in ["scaled", "true"]
                 end
             end
             if x_axis =="scaled"
-                x_axis_title = "scaled recombination rate (ρ)"
+                x_axis_title = "scaled reassortment rate (ρ)"
                 recomb_rate = pre_recomb_rate
                 x_ticks = pre_x_ticks
                 xpad = 70  # adjust function of font size
@@ -44,7 +44,7 @@ for x_axis in ["scaled", "true"]
                 end
                 recomb_rate = ((1/10000)*(params["n"]/2)^alpha) .* pre_recomb_rate
                 x_ticks = ((1/10000)*(params["n"]/2)^alpha) .* pre_x_ticks
-                x_axis_title = "true recombination rate (r)"
+                x_axis_title = "true reassortment rate (r)"
                 xpad = ((1/10000)*(params["n"]/2)^alpha)*70  # adjust function of font size   
             end
             p1 = plot(recomb_rate, mean_[1], widen = false, label="rMCCs - # ambig. splits", ylabel="# new splits", xlabel=x_axis_title , linecolor="red", link=:xaxis, title="Average #Splits from real MCCs in Average Tree in 8-Tree ARG", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :topright, legendfontsize=6)
