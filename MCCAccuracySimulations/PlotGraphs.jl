@@ -48,7 +48,7 @@ for x_axis in ["scaled", "true"]
                     end
                     if metric =="v-measure-complete"
                         label_name = "complete"
-                    else if metric =="v-measure-homogenity"
+                    elseif metric =="v-measure-homogenity"
                         label_name = "homogenity"
                     else
                         label_name = metric*" dist."

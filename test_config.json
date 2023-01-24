@@ -11,6 +11,9 @@
     "STRICT": [
         "true"
     ],
+    "ROUNDS": [
+        "1"
+    ],
     "n": 50,
     "sim": 10,
     "SEGMENTS": 8
