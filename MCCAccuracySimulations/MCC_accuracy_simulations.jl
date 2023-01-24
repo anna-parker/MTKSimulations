@@ -61,10 +61,6 @@ function parse_commandline()
             help = "default false"
             arg_type = Bool
             default = false
-        "--consistent"
-            help = "default false"
-            arg_type = Bool
-            default = false
     end
 
     return parse_args(s)
@@ -133,7 +129,7 @@ function complete(a, b)
     return c
 end
 
-function run_one_sim(no_lineages::Int, rec_rate::Float64, type, strict, simtype, res, k_range, rounds, consistent, final_no_resolve, pre_resolve)
+function run_one_sim(no_lineages::Int, rec_rate::Float64, type, strict, simtype, res, k_range, rounds, final_no_resolve, pre_resolve)
     a_index_i_vector = Dict()
     size_vector = Dict()
     
@@ -149,7 +145,7 @@ function run_one_sim(no_lineages::Int, rec_rate::Float64, type, strict, simtype,
 
         i_trees = [copy(t) for t in unresolved_trees]
 
-        i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, consistent, parallel=false, strict, rounds, final_no_resolve, pre_resolve))
+        i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, parallel=false, strict, rounds, final_no_resolve, pre_resolve))
         loc = sample(1:no_trees, 2, replace = false)
         names = [t.label for t in true_trees[rand_order][loc]]
 
@@ -176,7 +172,7 @@ function run_one_sim(no_lineages::Int, rec_rate::Float64, type, strict, simtype,
     return a_index_i_vector, size_vector
 end
 
-function run_MCC_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; type="VI", strict=true, simtype=:flu, res=0.3, k_range=2:8, rounds=2, consistent=false, final_no_resolve=false, pre_resolve=false)
+function run_MCC_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; type="VI", strict=true, simtype=:flu, res=0.3, k_range=2:8, rounds=2, final_no_resolve=false, pre_resolve=false)
     average_accuracy_i = Dict()
     average_size_i = Dict()
     accuracy_index_i = Dict{Int, Vector{Float32}}()
@@ -184,7 +180,7 @@ function run_MCC_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::F
     sim_results = Dict()
     new_range = vcat([1], collect(k_range))
     for i in 1:no_sim
-        sim_results[i] = Dagger.@spawn run_one_sim(no_lineages, rec_rate, type, strict, simtype, res, k_range, rounds, consistent, final_no_resolve, pre_resolve)
+        sim_results[i] = Dagger.@spawn run_one_sim(no_lineages, rec_rate, type, strict, simtype, res, k_range, rounds, final_no_resolve, pre_resolve)
     end
     size_index_i[1] = Float32[]
     for no_trees in k_range
@@ -241,7 +237,6 @@ function main()
     krange_ = parsed_args["krange"]
     final_no_resolve = parsed_args["final-no-resolve"]
     pre_resolve = parsed_args["pre-resolve"]
-    consistent = parsed_args["consistent"]
     if simt=="flu"
         simtype = :flu
     else
@@ -254,7 +249,7 @@ function main()
     end
     println("Simulating ARGs and sequences of sample size $n and recombination rate $r simtype $simt")
 
-    vi_accuracy_i, size_mccs_i = run_MCC_accuracy_simulations(num_sim, n, r; type=metric, strict, simtype, res, k_range, rounds, consistent, final_no_resolve, pre_resolve)
+    vi_accuracy_i, size_mccs_i = run_MCC_accuracy_simulations(num_sim, n, r; type=metric, strict, simtype, res, k_range, rounds, final_no_resolve, pre_resolve)
     write_output(o, vi_accuracy_i, size_mccs_i, metric, r; k_range)
 
 

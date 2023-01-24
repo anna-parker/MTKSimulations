@@ -12,7 +12,7 @@ The MCC Accuracy Simulation pipeline assesses the improvement in MCC inference w
 
 #### Rounds Pipeline
 
-This directory also contains a subdirectory with a pipeline to assess the impact of multiple rounds on MCC inference - the same technique is employed as above except that now the number of rounds used in MultiTreeKnit is an additional parameter. TreeKnit allows users to set the number of rounds of inference - if rounds is set to greater than 1 after the initial MCC inference and tree pair resolution TreeKnit will use the resolved trees from the previous round as input and the computed MCCs as a consistency constraint (if `consistent = true`) for this round of MCC inference and tree resolution.
+This directory also contains a subdirectory with a pipeline to assess the impact of multiple rounds on MCC inference - the same technique is employed as above except that now the number of rounds used in MultiTreeKnit is an additional parameter. TreeKnit allows users to set the number of rounds of inference, and if trees should be resolved.
 
 ## MCC measures
 
@@ -81,7 +81,7 @@ The difference between the rand index and the VI distance is also visible - at h
 
 <em>ARGs simulated under kingman coalescence model, resolution rate 0.3 and strict resolve</em>
 
-We do not see a prominent difference between when the consistent parameter is used or not. 
+We do not see a prominent difference between when the consistent parameter is used or not - this has therefore been removed as an option for the final release.
 
 <img src="Figures/VI_Accuracy_kingman_0.3_true_consistent.png" width="49%"/> <img src="Figures/VI_Accuracy_kingman_0.3_true.png" width="49%"/> 
 

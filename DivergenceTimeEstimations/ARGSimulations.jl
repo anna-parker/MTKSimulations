@@ -155,7 +155,7 @@ function simulate(n::Int, rec_rate::Number, outfolder::AbstractString; remove=fa
         i_trees = [copy(t) for t in trees[rand_order]]
         names = [t.label for t in i_trees]
         if infer == true
-            i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, consistent = false, parallel=true, rounds=1, resolve=false, strict))
+            i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, parallel=true, rounds=1, resolve=false, strict))
         else
             i_MCCs = Vector{Vector{String}}[]
             for pair in combinations(rand_order,2)

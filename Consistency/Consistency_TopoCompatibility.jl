@@ -57,10 +57,6 @@ function parse_commandline()
             help = "default false"
             arg_type = Bool
             default = false
-        "--consistent"
-            help = "default false"
-            arg_type = Bool
-            default = false
     end
 
     return parse_args(s)
@@ -118,7 +114,7 @@ function topological_incompatibilities(t1::Tree{T}, t2::Tree{T}, MCCs::Vector{Ve
     return incompatiblilities/length(t1.lleaves)
 end
 
-function run_one_sim(no_lineages::Int, rec_rate::Float64, strict, simtype, consistent, res, k_range, rounds, final_no_resolve, pre_resolve)
+function run_one_sim(no_lineages::Int, rec_rate::Float64, strict, simtype, res, k_range, rounds, final_no_resolve, pre_resolve)
     results = Dict()
     
     c = get_c(res, rec_rate; n=no_lineages, simtype)
@@ -131,7 +127,7 @@ function run_one_sim(no_lineages::Int, rec_rate::Float64, strict, simtype, consi
         unresolved_trees = MTKTools.remove_branches(unresolved_trees; c)
 
         i_trees = [copy(t) for t in unresolved_trees]
-        i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, consistent, consistency_cost=20, parallel=false, strict, rounds, final_no_resolve, pre_resolve))
+        i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, parallel=false, strict, rounds, final_no_resolve, pre_resolve))
         if rounds==1 && final_no_resolve && !pre_resolve
             @assert all([SplitList(i_t) == SplitList(t) for (i_t, t) in zip(i_trees, unresolved_trees)])
         end
@@ -156,7 +152,7 @@ function run_one_sim(no_lineages::Int, rec_rate::Float64, strict, simtype, consi
     return results
 end
 
-function run_MCC_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; strict=true, simtype=:flu, consistent=false, res=0.3, k_range=2:8, rounds=2, final_no_resolve=false, pre_resolve=false)
+function run_MCC_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::Float64; strict=true, simtype=:flu, res=0.3, k_range=2:8, rounds=2, final_no_resolve=false, pre_resolve=false)
     percentage_incompatibilities = Dict{Int, Vector{Float32}}()
     percentage_unresolvable_incompatibilities = Dict{Int, Vector{Float32}}()
     consistency_rates = Dict{Int, Vector{Float32}}()
@@ -167,7 +163,7 @@ function run_MCC_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate::F
     
     sim_results = Dict()
     for i in 1:no_sim
-        sim_results[i] = Dagger.@spawn run_one_sim(no_lineages, rec_rate, strict, simtype, consistent, res, k_range, rounds, final_no_resolve, pre_resolve)
+        sim_results[i] = Dagger.@spawn run_one_sim(no_lineages, rec_rate, strict, simtype, res, k_range, rounds, final_no_resolve, pre_resolve)
     end
     for no_trees in k_range
         percentage_incompatibilities[no_trees] = Float32[]
@@ -216,7 +212,6 @@ function main()
     krange_ = parsed_args["krange"]
     final_no_resolve = parsed_args["final-no-resolve"]
     pre_resolve = parsed_args["pre-resolve"]
-    consistent = parsed_args["consistent"]
     if simt=="flu"
         simtype = :flu
     else
@@ -228,7 +223,7 @@ function main()
         k_range = [4,8]
     end
     println("Simulating ARGs and sequences of sample size $n and recombination rate $r simtype $simt")
-    incomp, unres_incomp, consist = run_MCC_accuracy_simulations(num_sim, n, r; strict, simtype, consistent, res, k_range, rounds, final_no_resolve, pre_resolve)
+    incomp, unres_incomp, consist = run_MCC_accuracy_simulations(num_sim, n, r; strict, simtype, res, k_range, rounds, final_no_resolve, pre_resolve)
     write_output(o, incomp, "topo_incomp", r; k_range)
     write_output(o, unres_incomp, "topo_unres_incomp", r; k_range)
     write_output(o, consist, "consistency", r; k_range)

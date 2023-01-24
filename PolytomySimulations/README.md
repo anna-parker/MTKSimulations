@@ -57,7 +57,7 @@ The RF distance plots are very similar to the split accuracy plots and as they c
 
 <em>Left: ARGs simulated under flu coalescence model and resolution rate 0.4 and strict resolve, Right: ARGs simulated under flu coalescence model and resolution rate 0.4 and liberal resolve</em>
 
-Again we note that the `consistent` parameter has little to no impact on our results. 
+Again we note that the `consistent` parameter has little to no impact on our results. (This option has therefore been removed).
 
 <img src="Figures/PercentageCorrectResolution_flu_0.3_true.png" width="49%"/> <img src="Figures/PercentageCorrectResolution_flu_0.3_true_consistent.png" width="49%"/> 
 

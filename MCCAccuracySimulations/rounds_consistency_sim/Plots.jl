@@ -13,7 +13,6 @@ pre_x_ticks= [round(10^e, digits=4) for e in range(-4, 0, 5)]
 
 for x_axis in ["scaled", "true"]
     for metric in params["METRIC"]
-        for consistent in params["CONSISTENT"]
             for sim in params["SIMTYPE"]
                 for res in params["RES"]
                     for strict in params["STRICT"]
@@ -32,7 +31,7 @@ for x_axis in ["scaled", "true"]
                                         else
                                             fr_val = 0
                                         end
-                                        filename = "results/results_"*sim*"_"*res*"_"*strict*"_"*r*"_"*pr*"_"*consistent*"_"*fr*"/results_"*metric*"_"*string(rec)*".txt"
+                                        filename = "results/results_"*sim*"_"*res*"_"*strict*"_"*r*"_"*pr*"_"*fr*"/results_"*metric*"_"*string(rec)*".txt"
                                         tc_file = CSV.read(filename, DataFrame)
                                         for k in [4,8]
                                             if !haskey(tc_mean_, (r, k, pr_val, fr_val))
@@ -73,7 +72,7 @@ for x_axis in ["scaled", "true"]
                                         pos = 1 +i+ 4*(parse(Int,r) -1)
                                         plot!(recomb_rate, tc_mean_[(r, k, vals...)], label="r="*string(r)*", "*metric*", "*name, ylabel="", xlabel=x_axis_title, linecolor=l_color[pos])
                                     end
-                                    savefig(p, "Plots/"*metric*"_k"*string(k)*"_"*sim*"_"*res*"_"*strict*"_"*consistent*"_"*x_axis*".png")
+                                    savefig(p, "Plots/"*metric*"_k"*string(k)*"_"*sim*"_"*res*"_"*strict*"_"*x_axis*".png")
                                 end
                             end
                         else
@@ -88,7 +87,7 @@ for x_axis in ["scaled", "true"]
                                         pos = 1 +i+ 4*(parse(Int,r) -1)
                                         plot!(recomb_rate, tc_mean_[(r, k, vals...)], label="r="*string(r)*", "*metric*" dist., "*name, ylabel="", xlabel=x_axis_title, linecolor=l_color[pos])
                                     end
-                                    savefig(p, "Plots/"*metric*"_k"*string(k)*"_"*sim*"_"*res*"_"*strict*"_"*consistent*"_"*x_axis*".png")
+                                    savefig(p, "Plots/"*metric*"_k"*string(k)*"_"*sim*"_"*res*"_"*strict*"_"*x_axis*".png")
                                 end
                             end
                         end
@@ -96,5 +95,4 @@ for x_axis in ["scaled", "true"]
                 end
             end
         end
-    end
 end
