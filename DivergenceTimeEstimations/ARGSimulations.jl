@@ -23,8 +23,8 @@ function create_accuracy_shared_branches_dict(tree, true_tree, MCC, rMCC)
     accuracy_dict = Dict{String, String}()
 
     ##note the true tree should be fully resolved
-    shared_branches_ = MTK.map_shared_branches(MCC, tree)
-    real_shared_branches_ = MTK.map_shared_branches(rMCC, true_tree)
+    shared_branches_ = MTKTools.map_shared_branches(MCC, tree)
+    real_shared_branches_ = MTKTools.map_shared_branches(rMCC, true_tree)
     true_splits = SplitList(true_tree)
     true_splits_dict = Dict()
     for n in nodes(true_tree)
@@ -155,7 +155,7 @@ function simulate(n::Int, rec_rate::Number, outfolder::AbstractString; remove=fa
         i_trees = [copy(t) for t in trees[rand_order]]
         names = [t.label for t in i_trees]
         if infer == true
-            i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, parallel=true, rounds=1, resolve=false, strict))
+            i_MCCs = run_treeknit!(i_trees, TreeKnit.OptArgs(;nMCMC=250, parallel=true, rounds=1, resolve=false, strict))
         else
             i_MCCs = Vector{Vector{String}}[]
             for pair in combinations(rand_order,2)

@@ -1,5 +1,4 @@
 using TreeKnit
-using TreeKnit.MTK
 using TreeTools
 using StatsBase
 using ArgParse
@@ -64,7 +63,7 @@ function parse_commandline()
 end
 
 function get_true_number_shared(tree, MCC)
-    shared_branches_ = MTK.map_shared_branches(MCC, tree)
+    shared_branches_ = MTKTools.map_shared_branches(MCC, tree)
     true_shared = 0
     for n in nodes(tree)
         if !isroot(n)
@@ -93,7 +92,7 @@ function run_shared_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rate
             unresolved_trees = MTKTools.remove_branches(unresolved_trees; c)
 
             i_trees = [copy(t) for t in unresolved_trees]
-            i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, consistent = false, parallel=true, strict))
+            i_MCCs = run_treeknit!(i_trees, TreeKnit.OptArgs(;nMCMC=250, parallel=true, strict))
             
             loc = sample(1:no_trees, 2, replace = false)
             labels = [t.label for t in true_trees[rand_order][loc]]

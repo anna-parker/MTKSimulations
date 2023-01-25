@@ -1,7 +1,6 @@
 using MTKTools
 using TreeTools
 using TreeKnit
-using TreeKnit.MTK
 using TestRecombTools
 using ArgParse
 using StatsBase
@@ -127,7 +126,7 @@ function run_one_sim(no_lineages::Int, rec_rate::Float64, strict, simtype, res, 
         unresolved_trees = MTKTools.remove_branches(unresolved_trees; c)
 
         i_trees = [copy(t) for t in unresolved_trees]
-        i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, parallel=false, strict, rounds, final_no_resolve, pre_resolve))
+        i_MCCs = run_treeknit!(i_trees, TreeKnit.OptArgs(;nMCMC=250, parallel=false, strict, rounds, final_no_resolve, pre_resolve))
         if rounds==1 && final_no_resolve && !pre_resolve
             @assert all([SplitList(i_t) == SplitList(t) for (i_t, t) in zip(i_trees, unresolved_trees)])
         end

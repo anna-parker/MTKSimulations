@@ -1,5 +1,4 @@
 using TreeKnit
-using TreeKnit.MTK
 using TreeTools
 using ArgParse
 using StatsBase 
@@ -159,7 +158,7 @@ function run_tree_poly_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_r
             unresolved_trees = MTKTools.remove_branches(unresolved_trees; c)
 
             i_trees = [copy(t) for t in unresolved_trees]
-            i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(;nMCMC=250, parallel=true, strict, rounds, final_no_resolve, pre_resolve))
+            i_MCCs = run_treeknit!(i_trees, TreeKnit.OptArgs(;nMCMC=250, parallel=true, strict, rounds, final_no_resolve, pre_resolve))
             
             loc = rand(1:no_trees)
             correct_new_splits_i, incorrect_new_splits_i = new_split_accuracy([true_trees[rand_order][loc]], [unresolved_trees[loc]], [i_trees[loc]])
@@ -212,7 +211,7 @@ function run_tree_rf_accuracy_simulations(no_sim::Int, no_lineages::Int, rec_rat
             unresolved_trees = MTKTools.remove_branches(unresolved_trees; c)
 
             i_trees = [copy(t) for t in unresolved_trees]
-            i_MCCs = MTK.get_infered_MCC_pairs!(i_trees, TreeKnit.OptArgs(; parallel=true, strict, rounds, final_no_resolve, pre_resolve))
+            i_MCCs = run_treeknit!(i_trees, TreeKnit.OptArgs(; parallel=true, strict, rounds, final_no_resolve, pre_resolve))
             
             loc = rand(1:no_trees)
             old_rf = new_tree_RF_dist([true_trees[rand_order][loc]], [unresolved_trees[loc]])
