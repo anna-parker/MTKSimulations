@@ -12,7 +12,6 @@ l_color = ["darkgreen", "lightgreen", "darkblue", "lightblue", "purple", "magent
 pre_x_ticks= [round(10^e, digits=4) for e in range(-4, 0, 5)]
 
 for x_axis in ["scaled", "true"]
-    for consistent in params["CONSISTENT"]
         for sim in params["SIMTYPE"]
             for res in params["RES"]
                 for strict in params["STRICT"]
@@ -32,9 +31,9 @@ for x_axis in ["scaled", "true"]
                                     else
                                         fr_val = 0
                                     end
-                                    filename = "results/results_"*sim*"_"*res*"_"*strict*"_"*r*"_"*pr*"_"*consistent*"_"*fr*"/results_correct_"*string(rec)*".txt"
+                                    filename = "results/results_"*sim*"_"*res*"_"*strict*"_"*r*"_"*pr*"_"*fr*"/results_correct_"*string(rec)*".txt"
                                     c_file = CSV.read(filename, DataFrame)
-                                    filename = "results/results_"*sim*"_"*res*"_"*strict*"_"*r*"_"*pr*"_"*consistent*"_"*fr*"/results_incorrect_"*string(rec)*".txt"
+                                    filename = "results/results_"*sim*"_"*res*"_"*strict*"_"*r*"_"*pr*"_"*fr*"/results_incorrect_"*string(rec)*".txt"
                                     ic_file = CSV.read(filename, DataFrame)
                                     for k in [2, 4,8]
                                         if !haskey(c_mean_, (r, k, pr_val, fr_val))
@@ -83,11 +82,10 @@ for x_axis in ["scaled", "true"]
                                 plot!(recomb_rate, c_mean_[(r, k, vals...)], label="r="*string(r)*", %correct, "*name, ylabel="", xlabel=x_axis_title, linecolor=l_color[pos])
                                 plot!(recomb_rate, ic_mean_[(r, k, vals...)], label="r="*string(r)*", %incorrect. "*name, ylabel="", xlabel=x_axis_title, linecolor=l_color[pos],linestyle=:dash)
                             end
-                            savefig(p, "Plots/PercentageCorrectResolution_k"*string(k)*"_"*sim*"_"*res*"_"*strict*"_"*consistent*"_"*x_axis*".png")
+                            savefig(p, "Plots/PercentageCorrectResolution_k"*string(k)*"_"*sim*"_"*res*"_"*strict*"_"*x_axis*".png")
                         end
                     end
                 end
             end
         end
-    end
 end

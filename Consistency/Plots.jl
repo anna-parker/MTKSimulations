@@ -2,7 +2,7 @@ using Plots
 using CSV
 using DataFrames
 using JSON3
-#Consistency/TopologicalCompatibility/
+
 json_string = read("consistent_config.json", String)
 
 params = JSON3.read(json_string)
@@ -13,7 +13,6 @@ pre_x_ticks= [round(10^e, digits=4) for e in range(-4, 0, 5)]
 
 
 for x_axis in ["scaled", "true"]
-    for consistent in params["CONSISTENT"]
         for sim in params["SIMTYPE"]
             for res in params["RES"]
                 for strict in params["STRICT"]
@@ -34,11 +33,11 @@ for x_axis in ["scaled", "true"]
                                     else
                                         fr_val = 0
                                     end
-                                    filename = "results/results_"*sim*"_"*res*"_"*strict*"_"*r*"_"*pr*"_"*consistent*"_"*fr*"/results_topo_incomp_"*string(rec)*".txt"
+                                    filename = "results/results_"*sim*"_"*res*"_"*strict*"_"*r*"_"*pr*"_"*fr*"/results_topo_incomp_"*string(rec)*".txt"
                                     tc_file = CSV.read(filename, DataFrame)
-                                    filename = "results/results_"*sim*"_"*res*"_"*strict*"_"*r*"_"*pr*"_"*consistent*"_"*fr*"/results_topo_unres_incomp_"*string(rec)*".txt"
+                                    filename = "results/results_"*sim*"_"*res*"_"*strict*"_"*r*"_"*pr*"_"*fr*"/results_topo_unres_incomp_"*string(rec)*".txt"
                                     tc_ur_file = CSV.read(filename, DataFrame)
-                                    filename = "results/results_"*sim*"_"*res*"_"*strict*"_"*r*"_"*pr*"_"*consistent*"_"*fr*"/results_consistency_"*string(rec)*".txt"
+                                    filename = "results/results_"*sim*"_"*res*"_"*strict*"_"*r*"_"*pr*"_"*fr*"/results_consistency_"*string(rec)*".txt"
                                     const_file = CSV.read(filename, DataFrame)
                                     for k in [4,8]
                                         if !haskey(tc_mean_, (r, k, pr_val, fr_val))
@@ -90,7 +89,7 @@ for x_axis in ["scaled", "true"]
                                 plot!(recomb_rate, tc_mean_[(r, k, vals...)], label="r="*string(r)*", %incomp., "*name, ylabel="", xlabel=x_axis_title, linecolor=l_color[pos])
                                 plot!(recomb_rate, tc_ur_mean_[(r, k, vals...)], label="r="*string(r)*", %unres. incomp. "*name, ylabel="", xlabel=x_axis_title, linecolor=l_color[pos],linestyle=:dash)
                             end
-                            savefig(p, "Plots/Topo_Compat_k"*string(k)*"_"*sim*"_"*res*"_"*strict*"_"*consistent*"_"*x_axis*".png")
+                            savefig(p, "Plots/Topo_Compat_k"*string(k)*"_"*sim*"_"*res*"_"*strict*"_"*x_axis*".png")
                         end
                         p = plot(recomb_rate, const_mean_[(params["ROUNDS"][1], k, 0, 0)], label="r="*string(params["ROUNDS"][1])*", %incons. splits.", ylabel="%inconsistent splits", xlabel=x_axis_title, linecolor=l_color[1], title="%MCC Inconsistencies for Average Tree in "*string(k)*"-Tree ARG", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :outertopleft, legendfontsize=6)    
                         for r in params["ROUNDS"]
@@ -102,11 +101,10 @@ for x_axis in ["scaled", "true"]
                                 pos = 1 +i+ 4*(parse(Int,r) -1)
                                 plot!(recomb_rate, const_mean_[(r, k, vals...)], label="r="*string(r)*", %incons. splits, "*name, ylabel="", xlabel=x_axis_title, linecolor=l_color[pos])
                             end
-                            savefig(p, "Plots/Consistency_k"*string(k)*"_"*sim*"_"*res*"_"*strict*"_"*consistent*"_"*x_axis*".png")
+                            savefig(p, "Plots/Consistency_k"*string(k)*"_"*sim*"_"*res*"_"*strict*"_"*x_axis*".png")
                         end
                     end
                 end
             end
         end
-    end
 end

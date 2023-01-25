@@ -24,7 +24,7 @@ Pkg.add("Distributions")
 Pkg.add("Dagger")
 Pkg.add("Clustering")
 ## branch of TreeKnit with MultiTreeKnit module
-Pkg.add(url="https://github.com/PierreBarrat/TreeKnit.jl", rev="MTK_clean")
+Pkg.add(url="https://github.com/PierreBarrat/TreeKnit.jl", rev="MTK_no_consistency")
 ## modules needed for TestRecombTools - package with MCC metrics designed by Pierre
 Pkg.add(url="https://github.com/diegozea/ROC.jl", rev="master")
 ## needed for sequence simulations

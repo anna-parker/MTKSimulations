@@ -4,7 +4,6 @@ SIMTYPE = config.get("SIMTYPE")
 RES = config.get("RES")
 STRICT = config.get("STRICT")
 ROUNDS = config.get("ROUNDS")
-CONSISTENT = config.get("CONSISTENT")
 FINAL_NO_RESOLVE = config.get("FINAL_NO_RESOLVE")
 PRE_RESOLVE = config.get("PRE_RESOLVE")
 METRIC = config.get("METRIC")
@@ -30,7 +29,7 @@ rule run_simulations:
     input:
         "topo_compat.so"
     output:
-        expand(["results/results_{{simtype}}_{{res}}_{{strict}}_{{rounds}}_{{pre_resolve}}_{{consistent}}_{{final_no_resolve}}/results_{m}_{{rec}}.txt"], m=METRIC)
+        expand(["results/results_{{simtype}}_{{res}}_{{strict}}_{{rounds}}_{{pre_resolve}}_{{final_no_resolve}}/results_{m}_{{rec}}.txt"], m=METRIC)
     params: 
         n_leaves = config.get("n"),
         rounds  = config.get("sim"),
@@ -40,17 +39,16 @@ rule run_simulations:
         simtype = "(flu|kingman)",
         res = "(0.1|0.2|0.25|0.3|0.35|0.4)",
         rounds = "(1|2|3)",
-        consistent = "(true|false)",
         final_no_resolve = "(true|false)",
         pre_resolve = "(true|false)",
     shell:
      """
-        julia -J topo_compat.so --project=../.  Consistency_TopoCompatibility.jl --o "results/results_{wildcards.simtype}_{wildcards.res}_{wildcards.strict}_{wildcards.rounds}_{wildcards.pre_resolve}_{wildcards.consistent}_{wildcards.final_no_resolve}/" --rec {wildcards.rec} --n {params.n_leaves} --sim {params.rounds} --strict {wildcards.strict} --simtype {wildcards.simtype} --res {wildcards.res} --rounds {wildcards.rounds} --krange false --consistent {wildcards.consistent} --final-no-resolve {wildcards.final_no_resolve} --pre-resolve {wildcards.pre_resolve}
+        julia -J topo_compat.so --project=../.  Consistency_TopoCompatibility.jl --o "results/results_{wildcards.simtype}_{wildcards.res}_{wildcards.strict}_{wildcards.rounds}_{wildcards.pre_resolve}_{wildcards.final_no_resolve}/" --rec {wildcards.rec} --n {params.n_leaves} --sim {params.rounds} --strict {wildcards.strict} --simtype {wildcards.simtype} --res {wildcards.res} --rounds {wildcards.rounds} --krange false  --final-no-resolve {wildcards.final_no_resolve} --pre-resolve {wildcards.pre_resolve}
      """
 
 rule plot_graphs:
     input:
-        expand(["results/results_{simtype}_{res}_{strict}_{rounds}_{pre_resolve}_{consistent}_{final_no_resolve}/results_{m}_{rec}.txt"], rec=REC, m=METRIC, strict=STRICT, simtype=SIMTYPE, res=RES, rounds=ROUNDS, consistent=CONSISTENT, final_no_resolve=FINAL_NO_RESOLVE, pre_resolve=PRE_RESOLVE)
+        expand(["results/results_{simtype}_{res}_{strict}_{rounds}_{pre_resolve}_{final_no_resolve}/results_{m}_{rec}.txt"], rec=REC, m=METRIC, strict=STRICT, simtype=SIMTYPE, res=RES, rounds=ROUNDS, final_no_resolve=FINAL_NO_RESOLVE, pre_resolve=PRE_RESOLVE)
     output:
         "Plots.zip"
     shell:
@@ -62,7 +60,7 @@ rule plot_graphs:
 
 rule zip:
     input:
-        expand(["results/results_{simtype}_{res}_{strict}_{rounds}_{pre_resolve}_{consistent}_{final_no_resolve}/results_{m}_{rec}.txt"], rec=REC, m=METRIC, strict=STRICT, simtype=SIMTYPE, res=RES, rounds=ROUNDS, consistent=CONSISTENT, final_no_resolve=FINAL_NO_RESOLVE, pre_resolve=PRE_RESOLVE),
+        expand(["results/results_{simtype}_{res}_{strict}_{rounds}_{pre_resolve}_{final_no_resolve}/results_{m}_{rec}.txt"], rec=REC, m=METRIC, strict=STRICT, simtype=SIMTYPE, res=RES, rounds=ROUNDS, final_no_resolve=FINAL_NO_RESOLVE, pre_resolve=PRE_RESOLVE),
         "Plots.zip"
     output:
         "results.zip"
