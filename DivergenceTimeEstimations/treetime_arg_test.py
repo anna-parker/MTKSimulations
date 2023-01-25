@@ -107,6 +107,8 @@ def compute_average_dist_dict(true_tree, tt_old, tt_arg, val=None, shared_dict=N
     if shared_dict is not None:
         node_names = [n for n in node_names if shared_dict.get(n, 0) == val]
         l = len(node_names)
+    else:
+        l = len(node_names)
     if len(node_names) == 0:
         return {"median_old": np.nan, "mean_old": np.nan, "var_old": np.nan, "median_arg": np.nan, "mean_arg": np.nan, "var_arg": np.nan, "length": 0}
 
