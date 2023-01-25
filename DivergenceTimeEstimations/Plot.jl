@@ -90,15 +90,15 @@ for x_axis in ["scaled", "true"]
                     xpad = ((1/10000)*(params["n"]/2)^alpha)*20  # adjust function of font size 
                 end
                 if params["SEGMENTS"] == 2
-                    for (name, vector) in zip(["mean", "median", "var"], [mean_, median_, var_])
-                        p1 = plot(recomb_rate, vector["TP"][1], widen = false, label="k=1, TP", ylabel=name, xlabel=x_axis_title, linecolor=l_color[2], linestyle=:dash, link=:xaxis!, title="Difference Divergence Time Estimates ("*name*")", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :topright, legendfontsize=6)
+                    for (name, vector, ylabel_name) in zip(["mean", "median", "var"], [mean_, median_, var_], ["ME", "median error", "(SE)^2"])
+                        p1 = plot(recomb_rate, vector["TP"][1], widen = false, label="k=1, TP", ylabel=ylabel_name, xlabel=x_axis_title, linecolor=l_color[2], linestyle=:dash, link=:xaxis!, title="Difference Divergence Time Estimates ("*ylabel_name*")", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :topright, legendfontsize=6)
                         for (i, val) in enumerate(["TP", "TN", "FN", "FP"])
                             pos = 2*i
                             if val !="TP"
-                                plot!(recomb_rate, vector[val][1], label="k=1, "*val, ylabel=name, xlabel=x_axis_title, linecolor=l_color[pos], linestyle=:dash)
+                                plot!(recomb_rate, vector[val][1], label="k=1, "*val, ylabel=ylabel_name, xlabel=x_axis_title, linecolor=l_color[pos], linestyle=:dash)
                             end
                             for no_trees in range(2,params["SEGMENTS"])
-                                plot!(recomb_rate, vector[val][no_trees], label="k="*string(no_trees)*", "*val, ylabel=name, xlabel=x_axis_title, linecolor=l_color[pos])
+                                plot!(recomb_rate, vector[val][no_trees], label="k="*string(no_trees)*", "*val, ylabel=ylabel_name, xlabel=x_axis_title, linecolor=l_color[pos])
                             end
                         end
                         vspan!([recomb_rate[end], recomb_rate[end]+xpad], c=:white, lc=:white, label=false)
@@ -113,10 +113,10 @@ for x_axis in ["scaled", "true"]
                         savefig(p, "Plots/"*name*"_divergence_times_"*sim*"_"*res*"_"*strict*"_"*x_axis*".png")
                     end
                 else
-                    for (name, vector) in zip(["mean", "median", "var"], [mean_, median_, var_])
-                        p = plot(recomb_rate, vector[1], label="k=1 (standard)", ylabel=name, xlabel=x_axis_title, linecolor="brown", title="Difference Divergence Time Estimates ("*name*")", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :outertopleft, legendfontsize=6)
+                    for (name, vector, ylabel_name) in zip(["mean", "median", "var"], [mean_, median_, var_], ["ME", "median error", "(SE)^2"])
+                        p = plot(recomb_rate, vector[1], label="k=1 (standard)", ylabel=ylabel_name, xlabel=x_axis_title, linecolor="brown", title="Difference Divergence Time Estimates ("*ylabel_name*")", titlefontsize=10, margin=8Plots.mm, xaxis= :log10, xguidefontsize=7, yguidefontsize=7, xtickfontsize=6, ytickfontsize=6, xticks=x_ticks, legend = :outertopleft, legendfontsize=6)
                         for no_trees in range(2,params["SEGMENTS"])
-                            plot!(recomb_rate, vector[no_trees], label="k="*string(no_trees), ylabel=name, xlabel=x_axis_title, linecolor=l_color[no_trees-1])
+                            plot!(recomb_rate, vector[no_trees], label="k="*string(no_trees), ylabel=ylabel_name, xlabel=x_axis_title, linecolor=l_color[no_trees-1])
                         end
                         savefig(p, "Plots/"*name*"_divergence_times_"*sim*"_"*res*"_"*strict*"_"*x_axis*".png")
                     end
